@@ -1,0 +1,30 @@
+{
+  "manifest_version": "overlay.manifest.v0",
+  "overlay_id": "beatoven",
+  "overlay_version": "0.1.0",
+  "title": "BeatOven",
+  "description": "Oracle-to-music rendering overlay: emits DAW-ready MIDI/CV packs + session recipe + provenance.",
+  "entrypoints": {
+    "cli": "beatoven.cli:main",
+    "rune": "beatoven.runes.catalog:register"
+  },
+  "capabilities": {
+    "filesystem_read": ["$AAL_LOCAL_STORE/**"],
+    "filesystem_write": ["$AAL_LOCAL_STORE/**"],
+    "network": "deny",
+    "calendar": "deny",
+    "email": "deny"
+  },
+  "dependencies": {
+    "oracle_signal_layer": ">=2.0.0",
+    "abx_runes": ">=2.2.0"
+  },
+  "artifacts": [
+    "beatoven_midi_pack.v0.json",
+    "beatoven_cv_pack.v0.json",
+    "beatoven_session_recipe.v0.md",
+    "provenance_manifest.v0.json",
+    "determinism_report.v0.json"
+  ],
+  "stabilization_window": { "enabled": true, "cycles": 12 }
+}

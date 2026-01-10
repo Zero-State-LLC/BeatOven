@@ -1,0 +1,20 @@
+# --- APPEND START: BeatOven coupling rules ---
+- rule_id: beatoven_consumes_oracle_signal_layer_v2
+  when:
+    producer: abraxas
+    output_schema: oracle_signal_layer.v2
+  then:
+    allow_consumers: [beatoven]
+    mode: deterministic
+    note: "BeatOven reads oracle envelope only; no internal Abraxas imports."
+
+- rule_id: beatoven_optional_overlay_abx_gt
+  when:
+    producer: abx_gt
+    output_schema: abx_gt.signal.v0
+  then:
+    allow_consumers: [beatoven]
+    mode: optional
+    on_missing: not_computable
+    note: "GT overlay modulates arrangement tension; missing => logged not_computable, no failure."
+# --- APPEND END: BeatOven coupling rules ---

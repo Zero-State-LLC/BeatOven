@@ -1,0 +1,33 @@
+{
+  "test_suite": "beatoven.golden.v0",
+  "cases": [
+    {
+      "case_id": "determinism_same_input_same_output",
+      "seed": 1337,
+      "oracle_signal_layer_v2_min": {
+        "vector_mix": { "ritual_density": 0.62, "meme_velocity": 0.71, "nostalgia": 0.44, "symbolic_modulator": "WIND_SHIFT" },
+        "kairos": { "axis_of_fate": "CONSOLIDATE", "framebreaker": "TIMEBOX", "continuum_binder": "DAILY_RITUAL", "silent_sovereign": "DO_ONE_THING_CLEAN" }
+      },
+      "optional_overlays": {
+        "abx_gt": {
+          "game_type": "COORDINATION",
+          "equilibrium_confidence": 0.66,
+          "dominant_strategy_pressure": 0.58,
+          "mixed_strategy_entropy": 0.22,
+          "recommended_tension_curve": [0.12, 0.18, 0.22, 0.35, 0.48, 0.55, 0.6, 0.52]
+        }
+      },
+      "expected_invariants": ["output_hash_stable_over_12_runs", "tempo_within_bounds", "tracks_nonempty", "markers_present"]
+    },
+    {
+      "case_id": "overlay_absent_fallback_not_computable",
+      "seed": 1337,
+      "oracle_signal_layer_v2_min": {
+        "vector_mix": { "ritual_density": 0.3, "meme_velocity": 0.2, "nostalgia": 0.8, "symbolic_modulator": "EMBER" },
+        "kairos": { "axis_of_fate": "REFLECT", "framebreaker": "REDUCE_INPUTS", "continuum_binder": "SLEEP_HYGIENE", "silent_sovereign": "WRITE_IT_DOWN" }
+      },
+      "optional_overlays": {},
+      "expected_invariants": ["abx_gt_not_computable_logged", "output_generated_anyway", "determinism_true"]
+    }
+  ]
+}

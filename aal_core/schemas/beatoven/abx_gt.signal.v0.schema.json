@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "abx_gt.signal.v0.schema.json",
+  "title": "ABX-GT Signal v0",
+  "type": "object",
+  "required": ["game_type", "equilibrium_confidence", "dominant_strategy_pressure", "mixed_strategy_entropy", "recommended_tension_curve"],
+  "properties": {
+    "game_type": { "type": "string", "enum": ["COORDINATION", "ANTI_COORDINATION", "PRISONERS_DILEMMA", "STAG_HUNT", "BARGAINING", "UNKNOWN"] },
+    "equilibrium_confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "dominant_strategy_pressure": { "type": "number", "minimum": 0, "maximum": 1 },
+    "mixed_strategy_entropy": { "type": "number", "minimum": 0, "maximum": 1 },
+    "recommended_tension_curve": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 64,
+      "items": { "type": "number", "minimum": 0, "maximum": 1 }
+    }
+  }
+}
