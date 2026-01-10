@@ -1,0 +1,9 @@
+# --- APPEND START: BeatOven ---
+- rune_id: beatoven.render.v0
+  title: BeatOven Render
+  overlay_id: beatoven
+  input_schema: oracle_signal_layer.v2
+  output_schema: beatoven.pack.v0
+  description: "Render Oracle signals into DAW-ready MIDI/CV packs + session recipe + provenance."
+  capability_profile: local_only_no_network
+# --- APPEND END: BeatOven ---

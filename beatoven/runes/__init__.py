@@ -1,0 +1,1 @@
+"""BeatOven runes registry."""
