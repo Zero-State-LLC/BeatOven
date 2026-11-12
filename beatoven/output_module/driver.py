@@ -81,6 +81,31 @@ class LoopbackTransport:
         self.device.detach()
 
 
+class OneWayLoopbackTransport:
+    """A link with no return path and a byte rate, like TRS MIDI at 31.25 kbaud.
+
+    Each frame reaches the device after the line has carried all of its bytes.
+    """
+
+    simulated = True
+
+    def __init__(self, device: SimulatedOutputModule, clock: Clock, byte_us: int = 320) -> None:
+        self.device, self.clock, self.byte_us = device, clock, byte_us
+        self._line_free_at = 0
+
+    def send(self, data: bytes) -> None:
+        begin = max(self.clock.now_us(), self._line_free_at)
+        self._line_free_at = begin + len(data) * self.byte_us
+        self.device.feed(data, self._line_free_at)
+
+    def recv(self) -> bytes:
+        self.device.take_output()
+        return b""
+
+    def close(self) -> None:
+        self.device.detach()
+
+
 @dataclass
 class PlayReport:
     stream_id: str
@@ -90,6 +115,7 @@ class PlayReport:
     played_hash_ok: bool = False
     loss_reason: Optional[LossReason] = None
     detail: str = ""
+    confirmed: bool = True  # False on a one-way link: the host saw no reply
 
 
 class OutputModuleDriver:
@@ -262,6 +288,52 @@ class OutputModuleDriver:
             if self.clock.now_us() > start_host + stream.duration_us + self.reply_timeout_us:
                 self._send(Msg.ABORT)
                 return self._lost(sid, State.TIMING_LOST, LossReason.KEEPALIVE_TIMEOUT, 0)
+
+    def play_one_way(
+        self, stream: OutputStream, descriptor: Descriptor, *,
+        lead_us: int = 1_000_000, lookahead_us: int = 750_000, events_per_frame: int = 4,
+    ) -> PlayReport:
+        """Play over a link with no return path (TRS MIDI in).
+
+        The device starts ``lead_us`` after it receives the begin message and
+        times every event from there, so playback is still scheduled. The host
+        gets no Descriptor, no status and no played hash: the operator states
+        which ``descriptor`` the device has, and the report is unconfirmed.
+        If the link is too slow for the stream, the device fails closed.
+        """
+        if self.lifecycle.state is not State.DISCONNECTED:
+            self.lifecycle.fire(Event.ATTACH)  # raises IllegalTransition
+        require_hardware_lane(self.grant, simulated=getattr(self.transport, "simulated", False))
+        descriptor.check_stream(stream)
+        sid = stream.stream_id
+        self.descriptor = descriptor
+        self.lifecycle.fire(Event.ATTACH)
+        self._send(Msg.HELLO)
+        self._send(Msg.SYNC, struct.pack(">Q", self.clock.now_us()))
+        self.lifecycle.fire(Event.SYNC_OK)
+        self._send(Msg.STREAM_BEGIN_REL, struct.pack(
+            ">32sIQI", bytes.fromhex(sid), len(stream.events), lead_us, stream.clock_pulse_us))
+        self.lifecycle.fire(Event.STREAM_BEGIN)
+        start_host = self.clock.now_us() + lead_us
+        events, idx = stream.events, 0
+        last_keepalive = self.clock.now_us()
+        while idx < len(events):
+            now = self.clock.now_us()
+            if start_host + events[idx].t_us <= now + lookahead_us:
+                chunk = events[idx: idx + events_per_frame]
+                self._send(Msg.EVENTS, events_body(idx, chunk))
+                idx += len(chunk)
+                last_keepalive = now
+                continue
+            if now - last_keepalive >= self.sync_interval_us:
+                self._send(Msg.SYNC, struct.pack(">Q", now))
+                last_keepalive = now
+            self.clock.sleep_until(min(start_host + events[idx].t_us - lookahead_us,
+                                       last_keepalive + self.sync_interval_us))
+        self.clock.sleep_until(start_host + stream.duration_us + 1_000)
+        self.lifecycle.fire(Event.STREAM_END)
+        return PlayReport(sid, True, self.lifecycle.state, len(events), False, None,
+                          "sent on a one-way link; not confirmed by the device", confirmed=False)
 
     def _lost(self, sid: str, device_state: State, reason: Optional[LossReason], played: int) -> PlayReport:
         self.lifecycle.fire(Event.TIMING_LOSS)

@@ -121,6 +121,7 @@ Acceptance criteria:
 | FR-016 | At stream end the Output Module MUST report a hash of the events it played. | AT-015 |
 | FR-017 | The Hardware Lane MUST be closed by default. Only a Hardware Lane Grant that names the Output Module scope opens it. | AT-021 |
 | FR-018 | A simulated Output Module MUST produce a Jack Trace for any Output Stream, with no grant. | AT-016 |
+| FR-026 | On a link with no return path the Output Module MUST still schedule every event from a start it derives on receipt, and the host MUST report the run as unconfirmed. A link too slow for the stream MUST end in Timing Loss, not late notes. | AT-025, AT-026 |
 | FR-019 | The Module MUST be 3U (128.5 mm panel) and ≤ 12 HP `[NEEDS CLARIFICATION: final HP]`, and ≤ 40 mm deep behind the panel. | HT-1 (inspection) |
 | FR-020 | The Module MUST draw ≤ 120 mA from +12 V and ≤ 50 mA from −12 V, and MUST survive reversed power. | HT-1 |
 | FR-021 | The Module MUST provide ≥ 1 pitch output at 1 V/oct, ±1 cent per octave over 5 octaves after calibration; ≥ 4 CV outputs; ≥ 4 gate/trigger outputs; 1 clock and 1 reset output. | HT-2, HT-3 |
@@ -233,6 +234,7 @@ stateDiagram-v2
 | Lose the host | production-systems, anti-slop-code | timing_loss, safe_reached, resync | Safe Value policy in Descriptor (FR-014, 015) | AT-014, AT-018, AT-019 | 001-T011, T030, T031 |
 | Rehearse without hardware | anti-slop-code | all, on the simulated device | Jack Trace (FR-018), Hardware Lane (FR-017) | AT-016, AT-021 | 001-T022, T032 |
 | Bring existing contracts over | anti-slop-code, google-developer-style | none (pure compile) | Adapters, wire frame, Ops lane (FR-005–011) | AT-006–013 | 001-T040–T045 |
+| Play over the fallback link | production-systems, anti-slop-code | attach, sync_ok, stream_begin, stream_end, timing_loss (device side; host copy unconfirmed) | Relative stream start (FR-026) | AT-025, AT-026 | 001-T093 |
 | Use the physical Module | production-systems | all, on hardware | Electrical and timing limits (FR-019–025) | HT-1–HT-6 (plan only) | 001-T050–T056 |
 
 ## Open clarifications

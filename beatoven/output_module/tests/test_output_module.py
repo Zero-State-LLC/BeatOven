@@ -390,3 +390,40 @@ def test_at024_device_fails_closed_on_events_it_cannot_play(event, count):
     assert device.lifecycle.state is State.TIMING_LOST and device.loss_reason is LossReason.INTEGRITY
     device.advance(1_000_000)
     assert device.lifecycle.state is State.SAFE_IDLE and not [e for e in device.trace if e[2] == "CV_UV"]
+
+
+# ---- one-way fallback link (FR-026) -------------------------------------------------
+
+def test_at025_one_way_link_plays_the_same_jack_trace_unconfirmed():
+    from beatoven.output_module import OneWayLoopbackTransport
+    _, two_way_device, _, two_way = rig()
+    two_way.connect()
+    assert two_way.play(stream()).ok
+
+    clock = VirtualClock(1_000_000)
+    device = SimulatedOutputModule(clock_offset_us=55_555)
+    driver = OutputModuleDriver(OneWayLoopbackTransport(device, clock), clock)
+    report = driver.play_one_way(stream(), reference_descriptor())
+    device.advance(clock.now_us() + 1_000_000)
+    assert report.ok and report.confirmed is False and report.played_hash_ok is False
+    assert device.lifecycle.state is State.SYNCED and device.loss_reason is None
+    assert device.trace_csv() == two_way_device.trace_csv()
+
+
+def test_at026_one_way_link_too_slow_for_the_stream_fails_closed():
+    from beatoven.output_module import OneWayLoopbackTransport
+    clock = VirtualClock(1_000_000)
+    device = SimulatedOutputModule()
+    driver = OutputModuleDriver(OneWayLoopbackTransport(device, clock, byte_us=3_000), clock)
+    report = driver.play_one_way(stream(), reference_descriptor())
+    device.advance(clock.now_us() + 600_000_000)  # past everything the slow line still carried
+    device.advance(clock.now_us() + 601_000_000)
+    assert report.confirmed is False
+    moves = [(a, e) for a, e, _b in device.lifecycle.history]
+    assert (State.STREAMING, lc.Event.TIMING_LOSS) in moves and (State.STREAMING, lc.Event.STREAM_END) not in moves
+    assert device.lifecycle.state is not State.STREAMING
+    levels = {}
+    for _t, jack, kind, value in device.trace:
+        if kind == "LEVEL":
+            levels[jack] = value
+    assert set(levels.values()) <= {0}
