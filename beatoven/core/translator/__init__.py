@@ -175,11 +175,11 @@ class SymbolicTranslator:
         combined = self._apply_compression(combined)
 
         # Project to primary fields (sigmoid activation for 0-1 range)
-        resonance = float(self._sigmoid(combined @ self._resonance_proj))
-        density = float(self._sigmoid(combined @ self._density_proj))
-        drift = float(self._sigmoid(combined @ self._drift_proj))
-        tension = float(self._sigmoid(combined @ self._tension_proj))
-        contrast = float(self._sigmoid(combined @ self._contrast_proj))
+        resonance = float(self._sigmoid(combined @ self._resonance_proj).item())
+        density = float(self._sigmoid(combined @ self._density_proj).item())
+        drift = float(self._sigmoid(combined @ self._drift_proj).item())
+        tension = float(self._sigmoid(combined @ self._tension_proj).item())
+        contrast = float(self._sigmoid(combined @ self._contrast_proj).item())
 
         # Project to extended fields (tanh activation for -1 to 1)
         resonance_spectrum = np.tanh(combined @ self._resonance_spectrum_proj).astype(np.float32)

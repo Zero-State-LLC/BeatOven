@@ -5,5 +5,5 @@
   "events": 77,
   "host_clock_start_us": 1000000,
   "device_clock_offset_us": 0,
-  "note": "host_frames.hex: one host->device SysEx frame per line, in send order. The simulated device received each at the host time the driver sent it."
+  "note": "host_frames.hex: one host->device SysEx frame per line, in send order. host_frame_times.csv gives the host time each was sent and received."
 }

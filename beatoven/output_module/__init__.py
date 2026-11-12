@@ -24,7 +24,7 @@ from .contract import (
     OutputStream,
     reference_descriptor,
 )
-from .driver import LoopbackTransport, OutputModuleDriver, PlayReport, VirtualClock
+from .driver import LoopbackTransport, OneWayLoopbackTransport, OutputModuleDriver, PlayReport, VirtualClock
 from .lifecycle import Event, IllegalTransition, Lifecycle, LossReason, State
 from .sim import SimulatedOutputModule
 
@@ -34,6 +34,6 @@ __all__ = [
     "from_pack", "from_resonance_frame", "from_audio_control_frames", "from_cv_gate_map",
     "from_midi_event_stream",
     "HardwareLaneDenied", "HardwareLaneGrant",
-    "OutputModuleDriver", "LoopbackTransport", "PlayReport", "VirtualClock",
+    "OutputModuleDriver", "LoopbackTransport", "OneWayLoopbackTransport", "PlayReport", "VirtualClock",
     "SimulatedOutputModule", "Lifecycle", "State", "Event", "LossReason", "IllegalTransition",
 ]

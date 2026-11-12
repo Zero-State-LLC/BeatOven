@@ -35,6 +35,7 @@ class Msg(IntEnum):
     EVENTS = 0x04
     ABORT = 0x05
     OPS = 0x06
+    STREAM_BEGIN_REL = 0x07  # one-way links: the u64 is a lead time from receipt, not a device time
     # device -> host
     DESCRIPTOR = 0x41
     SYNC_ACK = 0x42
@@ -78,6 +79,8 @@ def unpack7(data: bytes) -> bytes:
         if len(group) < 2:
             raise WireError("truncated 7-bit group")
         msbs = group[0]
+        if msbs & 0x80:
+            raise WireError("data byte has bit 7 set")
         for j, b in enumerate(group[1:]):
             if b & 0x80:
                 raise WireError("data byte has bit 7 set")
@@ -103,6 +106,8 @@ class Frame:
             raise WireError("not a SysEx frame")
         if raw[1] != MANUFACTURER or raw[2:4] != MAGIC:
             raise WireError("not an Output Stream frame")
+        if raw[6] & 0x80:
+            raise WireError("seq has bit 7 set")
         if raw[4] != PROTO:
             raise WireError(f"unsupported protocol version {raw[4]}")
         try:

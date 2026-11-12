@@ -90,6 +90,7 @@ F0 7D 'B' 'O' <proto=1> <type> <seq> <7-bit packed (body + CRC-16/CCITT-FALSE)> 
 | `STREAM_BEGIN` 0x03 | → | 32-byte stream id, `u32` event count, `u64` start in device time, `u32` clock pulse µs |
 | `EVENTS` 0x04 | → | `u32` first index, `u8` count, count × 14-byte records |
 | `ABORT` 0x05 | → | empty |
+| `STREAM_BEGIN_REL` 0x07 | → | as `STREAM_BEGIN`, but the `u64` is a lead time in µs from receipt. For links with no return path |
 | `OPS` 0x06 | → | CBOR `{kind, nonce, payload}` (the Ops lane map, unchanged) |
 | `DESCRIPTOR` 0x41 | ← | CBOR Descriptor |
 | `SYNC_ACK` 0x42 | ← | echoed host time, `u64` device time |
@@ -197,5 +198,6 @@ Carried forward unchanged from `spec.md`.
 - The driver has no real MIDI port transport yet (001-T056). Everything has run only against the simulated device.
 - `SLEW_TO_SAFE` is recorded in the Jack Trace as one entry, not as a ramp of samples.
 - The simulated device answers `PING` only; other Ops kinds return not-ok.
-- The TRS one-way mode (start on receipt, no acknowledgements) is specified here but not implemented in the driver.
+- One-way mode (`play_one_way`, `STREAM_BEGIN_REL`) is implemented and tested on a simulated 31.25 kbaud line. Defaults: 1 s lead, 750 ms look-ahead, 4 events per frame. The host does not pre-check that the link can carry the stream; a stream that is too dense fails closed on the device.
+- After a one-way stream ends, the device times out to `SAFE_IDLE` within the sync timeout unless the host keeps sending sync messages. The next run re-syncs it.
 - The plain play-on-arrival MIDI mode (journey 5 in the concept) is not implemented.

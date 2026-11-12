@@ -39,7 +39,7 @@
 - [x] 001-T042 [P] MIDIEventStream.v1 adapter on the PROPOSED event shape: FR-009 (workflows: anti-slop-code)
 - [x] 001-T043 Ops lane carried in the new envelope: FR-011 (workflows: anti-slop-code, production-systems)
 - [x] 001-T044 Test that the Pack and its schema are untouched: FR-006 (workflows: anti-slop-code)
-- [ ] 001-T045 Write the Pack v1, ResonanceFrame and MIDIEventStream.v1 proposals as ADRs: FR-006 (workflows: google-developer-style)
+- [x] 001-T045 Write the Pack v1, ResonanceFrame and MIDIEventStream.v1 proposals as ADRs (`docs/adr/`, status PROPOSED): FR-006 (workflows: google-developer-style)
 
 ## P1-HW: The physical Output Module (hardware repo)
 
@@ -55,6 +55,8 @@
 
 - [ ] 001-T090 Converge the code against the spec after the operator's rulings (workflows: anti-slop-code)
 - [x] 001-T091 Add a CI job for the Output Module tests, the traceability check and the replay check (workflows: production-systems)
-- [ ] 001-T092 Fix or quarantine the failing tests that predate this branch (`test_api.py`, `test_doctrine.py`, `media_intel` without `cv2`) (workflows: anti-slop-code)
-- [ ] 001-T093 Implement TRS one-way mode and plain play-on-arrival mode, labelled non-deterministic (workflows: anti-slop-code, production-systems)
+- [x] 001-T092 Fix the API tests that failed on NumPy 2 (workflows: anti-slop-code)
+- [ ] 001-T095 Operator decides `test_infer_era_unknown`: the test expects `unknown` for zero sharpness, the code returns `1990s` (workflows: anti-slop-code)
+- [x] 001-T093 One-way link mode: FR-026 (workflows: anti-slop-code, production-systems)
+- [ ] 001-T096 Plain play-on-arrival MIDI mode, labelled non-deterministic (workflows: anti-slop-code, production-systems)
 - [x] 001-T094 README: mark the "<1ms" latency claim as unmeasured and point to this spec (workflows: google-developer-style)

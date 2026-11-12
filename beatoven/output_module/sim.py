@@ -126,11 +126,13 @@ class SimulatedOutputModule:
             elif st is State.SAFE_IDLE:
                 self.loss_reason = None
                 self.lifecycle.fire(Event.RESYNC)
-        elif f.type is Msg.STREAM_BEGIN:
+        elif f.type in (Msg.STREAM_BEGIN, Msg.STREAM_BEGIN_REL):
             if len(f.body) != 48:
                 self._ack(f, False)
                 return
             stream_id, count, start, pulse = struct.unpack(">32sIQI", f.body)
+            if f.type is Msg.STREAM_BEGIN_REL:
+                start += self._now  # lead time from receipt
             ok = (st is State.SYNCED and start >= self._now + self.descriptor.min_lead_us
                   and MIN_PULSE_US <= pulse <= MAX_PULSE_US)
             if ok:

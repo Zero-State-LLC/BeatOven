@@ -20,7 +20,7 @@ def _simulate(stream: OutputStream, offset: int = 0, record: list = None):
     transport = LoopbackTransport(device, clock)
     if record is not None:
         send = transport.send
-        transport.send = lambda data: (record.append(data), send(data))[1]
+        transport.send = lambda data: (record.append((clock.now_us(), data)), send(data))[1]
     driver = OutputModuleDriver(transport, clock)
     driver.connect()
     report = driver.play(stream)
@@ -68,13 +68,15 @@ def main(argv=None) -> int:
         out = Path(a.outdir)
         out.mkdir(parents=True, exist_ok=True)
         (out / "stream.json").write_text(json.dumps(stream.to_dict(), indent=2) + "\n")
-        (out / "host_frames.hex").write_text("".join(f.hex() + "\n" for f in sent))
+        (out / "host_frames.hex").write_text("".join(f.hex() + "\n" for _t, f in sent))
+        (out / "host_frame_times.csv").write_text(
+            "frame,t_host_us\n" + "".join(f"{i},{t}\n" for i, (t, _f) in enumerate(sent)))
         (out / "expected_trace.csv").write_text(device.trace_csv())
         (out / "manifest.json").write_text(json.dumps({
             "stream_id": stream.stream_id, "trace_sha256": device.trace_hash(), "frames": len(sent),
             "events": len(stream.events), "host_clock_start_us": 1_000_000, "device_clock_offset_us": 0,
             "note": "host_frames.hex: one host->device SysEx frame per line, in send order. "
-                    "The simulated device received each at the host time the driver sent it.",
+                    "host_frame_times.csv gives the host time each was sent and received.",
         }, indent=2) + "\n")
         return 0 if report.ok else 1
     return 2
