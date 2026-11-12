@@ -75,7 +75,7 @@ Schema: `beatoven/schemas/beatoven.output_stream.v1.schema.json`. Identifier: `b
 
 The Descriptor (`beatoven.output_module_descriptor.v1`) lists each channel's `min_uv`, `max_uv`, `bits`, `safe_policy` (`HOLD` or `SLEW_TO_SAFE`) and `safe_uv`, plus `queue_capacity`, `max_events_per_frame`, `min_lead_us`, `keepalive_timeout_us`, `sync_timeout_us`, `safe_slew_us`.
 
-PROPOSED reference channel set: 2 `PITCH_CV` (0 to +10 V, 16 bit, hold), 6 `MOD_CV` (−5 to +5 V, 16 bit, slew to 0 V), 4 `GATE`, 1 `CLOCK`, 1 `RESET`.
+Reference channel set (ranges decided by the operator on 2026-11-12): 2 `PITCH_CV` (0 to +10 V, 16 bit, hold), 6 `MOD_CV` (−5 to +5 V, 16 bit, slew to 0 V), 4 `GATE`, 1 `CLOCK`, 1 `RESET`.
 
 ### Wire
 
@@ -145,7 +145,7 @@ Deterministic replay: the firmware core, compiled on a desktop, must reproduce `
 `OutputModuleDriver(transport, clock, grant)`:
 
 - `connect()`: checks the Hardware Lane, sends `HELLO`, validates the Descriptor and contract version, syncs. Ends in `SYNCED` or `SAFE_IDLE` with `reject_reason`.
-- `play(stream)`: checks the stream against the Descriptor, sends `STREAM_BEGIN`, feeds events within the look-ahead, keeps syncing every 250 ms, and returns a `PlayReport` with the played-hash comparison or the loss reason.
+- `play(stream)`: checks the stream against the Descriptor, sends `STREAM_BEGIN`, feeds events within the look-ahead, keeps syncing every 100 ms, and returns a `PlayReport` with the played-hash comparison or the loss reason.
 - `resync()`: the only way out of `SAFE_IDLE`.
 - `ops(kind, payload)`: the Ops lane.
 

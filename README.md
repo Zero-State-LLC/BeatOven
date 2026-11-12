@@ -21,7 +21,7 @@ BeatOven is not Beatoven.ai. That is an unrelated company.
 
 | Part | State |
 |---|---|
-| Pack renderer (`render_pack`) | Works. Deterministic, with provenance hashes. |
+| Pack renderer (`render_pack`) | Works. Deterministic, with provenance hashes. Returns `beatoven.pack.v0` by default; `schema_version="v1"` returns a Pack that states its time unit and clock rate and embeds its Output Stream. |
 | Output Stream, adapters, host driver | Works. Tested against a simulated device, including through the operating system's MIDI stack. |
 | Driving real hardware | **Never done.** No Output Module has been built. Hardware control is off unless an operator supplies a grant file. |
 | Older engine modules (rhythm, harmony, stems, media intelligence, mobile UI) | Present and partly tested. Not maintained in this pass. See the [2025 README](docs/archive/README-2025.md). |
@@ -45,9 +45,9 @@ python -m beatoven.output_module replay-check beatoven/output_module/vectors/str
 ```
 
 ```text
-stream_id=453ea6bc2cf8461cc57a35b6aaea3bbd6dd44f717cfc68cc7c27300a47feab89
-run1=e15b1b3ebc6e524fd2fee5af13d0e79c315bcff357378bfdccdb9fd07f13e8ac
-run2=e15b1b3ebc6e524fd2fee5af13d0e79c315bcff357378bfdccdb9fd07f13e8ac
+stream_id=08592ce044c9a55020edcc006429d4720ede751373da3da400ca6ed516aa872a
+run1=ed5f5523f72375e7eb6b60fa5756e9a0e2cd25e0482f86b801eb3ecd276ca92d
+run2=ed5f5523f72375e7eb6b60fa5756e9a0e2cd25e0482f86b801eb3ecd276ca92d
 identical=True
 ```
 
@@ -67,6 +67,7 @@ from beatoven.output_module import (
 
 pack = render_pack(oracle_signal, overlays={}, seed=7, daw="ableton")
 stream = from_pack(pack)   # Pack times are in bars; the clock follows tempo at 24 pulses per quarter note
+# render_pack(..., schema_version="v1") returns a Pack with this stream already embedded
 
 clock = VirtualClock()
 device = SimulatedOutputModule()
@@ -93,7 +94,8 @@ print(report.ok, device.trace_hash())
 | [specs/001-output-module/spec.md](specs/001-output-module/spec.md) | What the Output Module must do, the connection lifecycle, open questions |
 | [specs/001-output-module/plan.md](specs/001-output-module/plan.md) | The Output Stream contract, wire format, migration from the older contracts |
 | [specs/001-output-module/audit.md](specs/001-output-module/audit.md) | What was wrong before, with evidence |
-| [docs/adr/](docs/adr/) | Decisions and proposals |
+| [docs/decisions/](docs/decisions/2026-11-12-operator-decisions.md) | The operator's decisions of 2026-11-12, and [what was applied](docs/decisions/applied.md) |
+| [docs/adr/](docs/adr/) | Decisions and proposals. 0005 (CLOCK IN) and 0006 (calibration) await a ruling |
 | [GLOSSARY.md](GLOSSARY.md) | The words this project uses |
 | [docs/handoff/NEXT.md](docs/handoff/NEXT.md) | Current state and what is next |
 | [CHANGELOG.md](CHANGELOG.md) | What changed in each version |
@@ -107,7 +109,7 @@ print(report.ok, device.trace_hash())
 - **PsyFi owns visualization.** BeatOven does not render visuals.
 - **Public shapes change by proposal.** See [CONTRIBUTING.md](CONTRIBUTING.md).
 
-The full list is in the [constitution](.specify/memory/constitution.md) (draft).
+The full list is in the [constitution](.specify/memory/constitution.md), ratified as 1.0.0 on 2026-11-12.
 
 ## Contributing and security
 

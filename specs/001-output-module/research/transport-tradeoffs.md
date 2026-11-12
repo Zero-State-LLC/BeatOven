@@ -48,7 +48,7 @@ The Realtime lane (`/macro`, `/meta` text records) is not carried to the Output 
 
 ## Open items that could change this choice
 
-- `[NEEDS CLARIFICATION: is iOS a required host?]` If not, USB-CDC becomes viable, though nothing argues for switching.
+- Decided 2026-11-12: iOS is not a required host for v1. USB-CDC is therefore viable, though nothing argues for switching.
 - `[NEEDS CLARIFICATION: MIDI manufacturer ID]` The wire uses 0x7D, the non-commercial ID. A product needs an assigned ID.
 - Not verified: sustained SysEx throughput per OS (§1.6, §7). A Windows update is reported to split SysEx (OBSERVED, anecdotal, §1.6). Windows is not a target host; if it becomes one, test first.
 

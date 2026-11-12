@@ -1,6 +1,6 @@
 # Next
 
-Updated 2026-11-12, branch `feat/pack-v1-and-frame-determinism`.
+Updated 2026-11-12. `main` is at PR #30: operator decisions applied, Pack v1 and `ResonanceFrame.from_source` implemented.
 
 ## State
 
@@ -12,6 +12,7 @@ Updated 2026-11-12, branch `feat/pack-v1-and-frame-determinism`.
   - `python scripts/check_spec_trace.py` (traceability; stands in for spec-lint, which is not on this machine)
   - `python -m beatoven.output_module replay-check <stream.json>`
 - Hardware is in the Kiln repo. No board exists. Every bench number there is a plan.
+- Kiln state on 2026-11-12: the firmware core reproduces the current golden vectors (963 checks) on branch `fw/revendor-contract`, not yet merged. The board is being re-placed on `hw/kicad-rev-a` for the LED, USB-C and header decisions; it is not manufacturable until its DRC shows 0 errors and 0 unrouted connections.
 
 ## Needs the operator
 
