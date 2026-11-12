@@ -32,9 +32,11 @@ _P_OFF, _P_EVENT, _P_CLOCK = 0, 1, 2
 
 
 class SimulatedOutputModule:
-    def __init__(self, descriptor: Optional[Descriptor] = None, clock_offset_us: int = 0) -> None:
+    def __init__(self, descriptor: Optional[Descriptor] = None, clock_offset_us: int = 0,
+                 clock_ppm: int = 0) -> None:
         self.descriptor = descriptor or reference_descriptor()
-        self.clock_offset_us = clock_offset_us  # device clock = host clock + offset
+        self.clock_offset_us = clock_offset_us  # device clock = host clock + offset, plus drift
+        self.clock_ppm = clock_ppm              # device crystal error against the host clock
         self.lifecycle = Lifecycle()
         self.trace: List[TraceEntry] = []
         self.loss_reason: Optional[LossReason] = None
@@ -82,7 +84,7 @@ class SimulatedOutputModule:
 
     # ---- time -------------------------------------------------------------
     def advance(self, host_now_us: int) -> None:
-        target = host_now_us + self.clock_offset_us
+        target = host_now_us + self.clock_offset_us + host_now_us * self.clock_ppm // 1_000_000
         while self._heap and self._heap[0][0] <= target:
             t, _prio, _n, action = heapq.heappop(self._heap)
             self._now = t

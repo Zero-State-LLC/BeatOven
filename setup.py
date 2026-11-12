@@ -43,6 +43,10 @@ setup(
             "scipy>=1.10.0",
             "soundfile>=0.12.0",
         ],
+        "hardware-midi": [
+            "python-rtmidi>=1.5.8",
+            "cbor2>=5.4.0",
+        ],
         "hardware": [
             "pyserial>=3.5",
             "cbor2>=5.4.0",

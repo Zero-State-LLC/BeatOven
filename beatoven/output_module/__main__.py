@@ -1,7 +1,7 @@
-"""CLI: python -m beatoven.output_module {compile,simulate,replay-check,vectors}
+"""CLI: python -m beatoven.output_module {compile,simulate,replay-check,vectors,ports,send}
 
-Nothing here drives hardware. ``simulate`` and ``replay-check`` use the
-simulated Output Module.
+Only ``send`` can drive a device, and it refuses without an operator grant
+file. Everything else uses the simulated Output Module.
 """
 
 from __future__ import annotations
@@ -43,7 +43,41 @@ def main(argv=None) -> int:
     v = sub.add_parser("vectors", help="write golden vectors for firmware tests")
     v.add_argument("stream")
     v.add_argument("outdir")
+    sub.add_parser("ports", help="list the MIDI ports the OS exposes")
+    p = sub.add_parser("send", help="play an Output Stream to a real MIDI port (needs an operator grant)")
+    p.add_argument("stream")
+    p.add_argument("--out", required=True, help="substring of the output port name")
+    p.add_argument("--in", dest="inp", required=True, help="substring of the input port name")
+    p.add_argument("--grant", required=True, help="path to a Hardware Lane Grant file")
+    p.add_argument("--lookahead-ms", type=int, default=100)
     a = ap.parse_args(argv)
+
+    if a.cmd == "ports":
+        from .midi_port import list_ports
+        print(json.dumps(list_ports(), indent=2))
+        return 0
+    if a.cmd == "send":
+        from .authority import HardwareLaneGrant
+        from .midi_port import MidiPortTransport
+        from .authority import HardwareLaneDenied
+        try:
+            grant = HardwareLaneGrant.load(Path(a.grant))
+            grant.check()
+        except HardwareLaneDenied as exc:
+            print(f"hardware lane denied: {exc}", file=sys.stderr)
+            return 1
+        stream = OutputStream.from_dict(json.loads(Path(a.stream).read_text()))
+        driver = OutputModuleDriver(MidiPortTransport(a.out, a.inp), grant=grant,
+                                    lookahead_us=a.lookahead_ms * 1000, lead_us=a.lookahead_ms * 1000)
+        state = driver.connect()
+        if state.value != "SYNCED":
+            print(f"not connected: {state.value}: {driver.reject_reason}", file=sys.stderr)
+            return 1
+        report = driver.play(stream)
+        driver.close()
+        print(f"ok={report.ok} state={report.final_state.value} played={report.played} "
+              f"played_hash_ok={report.played_hash_ok} loss={report.loss_reason} {report.detail}")
+        return 0 if report.ok else 1
 
     if a.cmd == "compile":
         stream = from_pack(json.loads(Path(a.pack).read_text()), time_unit=a.time_unit, clock_ppqn=a.clock_ppqn)

@@ -143,6 +143,7 @@ class OutputModuleDriver:
         self._inbox: List[Frame] = []
         self._last_sync = 0
         self._nonce = 1
+        self.max_sync_rtt_us = 5_000
 
     # ---- plumbing ---------------------------------------------------------
     def _send(self, mtype: Msg, body: bytes = b"") -> int:
@@ -247,8 +248,9 @@ class OutputModuleDriver:
         desc.check_stream(stream)  # raises ContractError; state stays SYNCED
 
         start_host = self.clock.now_us() + max(self.lead_us, desc.min_lead_us * 2)
+        start_device = start_host + self.offset_us  # fixed for the whole stream
         seq = self._send(Msg.STREAM_BEGIN, struct.pack(
-            ">32sIQI", bytes.fromhex(sid), len(stream.events), start_host + self.offset_us, stream.clock_pulse_us))
+            ">32sIQI", bytes.fromhex(sid), len(stream.events), start_device, stream.clock_pulse_us))
         ack = self._wait(Msg.ACK)
         if ack is None or ack.body != bytes([seq, 1]):
             return PlayReport(sid, False, self.lifecycle.state, detail="device refused STREAM_BEGIN")
@@ -258,6 +260,7 @@ class OutputModuleDriver:
         events, idx, batch = stream.events, 0, desc.max_events_per_frame
         while True:
             now = self.clock.now_us()
+            start_host = start_device - self.offset_us  # follows the device clock as it drifts
             while idx < len(events) and start_host + events[idx].t_us <= now + self.lookahead_us:
                 chunk = events[idx: idx + batch]
                 chunk = [e for e in chunk if start_host + e.t_us <= now + self.lookahead_us]
@@ -279,6 +282,8 @@ class OutputModuleDriver:
             if now - self._last_sync >= self.sync_interval_us:
                 self._send(Msg.SYNC, struct.pack(">Q", now))
                 self._last_sync = now
+                self._track_offset(now)
+                start_host = start_device - self.offset_us
             wake = now + self.sync_interval_us
             if idx < len(events):
                 wake = min(wake, start_host + events[idx].t_us - self.lookahead_us)
@@ -334,6 +339,23 @@ class OutputModuleDriver:
         self.lifecycle.fire(Event.STREAM_END)
         return PlayReport(sid, True, self.lifecycle.state, len(events), False, None,
                           "sent on a one-way link; not confirmed by the device", confirmed=False)
+
+    def _track_offset(self, sent_at: int) -> None:
+        """Wait briefly for the reply to a sync sent mid-stream and follow the device clock.
+
+        A reply slower than ``max_sync_rtt_us`` says little about the offset and is ignored.
+        """
+        while True:
+            self._poll()
+            for i, f in enumerate(self._inbox):
+                if f.type is Msg.SYNC_ACK and struct.unpack(">Q", f.body[:8])[0] == sent_at:
+                    del self._inbox[i]
+                    rtt = self.clock.now_us() - sent_at
+                    self.offset_us = struct.unpack(">Q", f.body[8:])[0] - sent_at - rtt // 2
+                    return
+            if self.clock.now_us() - sent_at >= self.max_sync_rtt_us:
+                return
+            self.clock.sleep_until(self.clock.now_us() + 250)
 
     def _lost(self, sid: str, device_state: State, reason: Optional[LossReason], played: int) -> PlayReport:
         self.lifecycle.fire(Event.TIMING_LOSS)
