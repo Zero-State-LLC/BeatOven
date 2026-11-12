@@ -15,6 +15,8 @@ Updated 2026-11-11, branch `feat/output-module-contract`.
 
 ## Needs the operator
 
+Every open decision has a recommended answer in `docs/decisions/2026-11-12-operator-decisions.md`. Reply with the row numbers you accept.
+
 0. Install KiCad 10 (`brew install --cask kicad` asks for your password). Schematic, ERC, DRC and Gerbers are blocked on it.
 
 1. Hardware lane authority: amend Spine 006/009 or issue a scoped grant. Until then nothing may drive a device.

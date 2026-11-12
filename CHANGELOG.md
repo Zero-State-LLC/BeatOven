@@ -6,6 +6,10 @@ Schema identifiers such as `beatoven.pack.v0` and `beatoven.output_stream.v1` ar
 
 ## [Unreleased]
 
+### Added
+
+- Decision brief with a recommended answer for every open operator decision (`docs/decisions/`).
+
 ### Changed
 
 - CI runs the full test suite and tests the Output Module on Python 3.10, 3.11 and 3.13. The minimum Python is now 3.10; 3.9 is past end of life and cannot be tested on current CI runners.
