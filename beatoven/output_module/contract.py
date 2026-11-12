@@ -279,7 +279,7 @@ class Descriptor:
     queue_capacity: int = 1024
     max_events_per_frame: int = 16
     min_lead_us: int = 5_000
-    keepalive_timeout_us: int = 500_000
+    keepalive_timeout_us: int = 300_000
     sync_timeout_us: int = 2_000_000
     safe_slew_us: int = 50_000
 

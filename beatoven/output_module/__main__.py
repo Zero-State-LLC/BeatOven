@@ -32,8 +32,8 @@ def main(argv=None) -> int:
     sub = ap.add_subparsers(dest="cmd", required=True)
     c = sub.add_parser("compile", help="BeatOven Pack JSON -> Output Stream JSON")
     c.add_argument("pack")
-    c.add_argument("--time-unit", required=True, choices=["beats", "bars", "seconds"])
-    c.add_argument("--clock-ppqn", type=int)
+    c.add_argument("--time-unit", default="bars", choices=["beats", "bars", "seconds"])
+    c.add_argument("--clock-ppqn", type=int, default=24, help="pulses per quarter note; 0 for no clock")
     c.add_argument("-o", "--out")
     s = sub.add_parser("simulate", help="play an Output Stream on the simulated device; print the jack trace")
     s.add_argument("stream")
@@ -80,7 +80,7 @@ def main(argv=None) -> int:
         return 0 if report.ok else 1
 
     if a.cmd == "compile":
-        stream = from_pack(json.loads(Path(a.pack).read_text()), time_unit=a.time_unit, clock_ppqn=a.clock_ppqn)
+        stream = from_pack(json.loads(Path(a.pack).read_text()), time_unit=a.time_unit, clock_ppqn=a.clock_ppqn or None)
         text = json.dumps(stream.to_dict(), indent=2) + "\n"
         Path(a.out).write_text(text) if a.out else sys.stdout.write(text)
         return 0

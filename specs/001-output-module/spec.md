@@ -95,7 +95,7 @@ Acceptance criteria:
 1. **Given** a powered Module, **when** rail current is measured, **then** +12 V ≤ 120 mA and −12 V ≤ 50 mA; **and** a reversed power cable does no damage. (HT-1)
 2. **Given** a trigger, **when** its width is measured, **then** it is ≥ 1 ms and equal to the requested width; **and** over ≥ 10 000 clock edges, jitter is ≤ 100 µs RMS against the host clock, or ≤ 50 µs when following the clock input. (HT-2)
 3. **Given** calibration, **when** C0 to C5 is measured at 13 points, **then** error is within ±1 cent per octave. (HT-3)
-4. **Given** a host send time, **when** the jack edge is measured, **then** latency is ≤ 2 ms at p99. (HT-4)
+4. **Given** a host send time, **when** the jack edge is measured, **then** each event is within 100 µs RMS of its scheduled time. (HT-4)
 5. **Given** any output shorted to +12 V, −12 V or ground indefinitely, or a cable hot-plugged, **then** nothing is damaged. (HT-5)
 6. **Given** the same BeatOvenRun.v1 sent twice, **when** logic-analyzer captures are diffed, **then** they are identical and match the simulated Jack Trace. (HT-6)
 
@@ -123,10 +123,10 @@ Acceptance criteria:
 | FR-018 | A simulated Output Module MUST produce a Jack Trace for any Output Stream, with no grant. | AT-016 |
 | FR-026 | On a link with no return path the Output Module MUST still schedule every event from a start it derives on receipt, and the host MUST report the run as unconfirmed. A link too slow for the stream MUST end in Timing Loss, not late notes. | AT-025, AT-026 |
 | FR-027 | The host MUST be able to play an Output Stream through the operating system's own MIDI ports, with the same Jack Trace as in simulation. | AT-028 |
-| FR-019 | The Module MUST be 3U (128.5 mm panel) and ≤ 12 HP `[NEEDS CLARIFICATION: final HP]`, and ≤ 40 mm deep behind the panel. | HT-1 (inspection) |
+| FR-019 | The Module MUST be 3U (128.5 mm panel) and 12 HP, and ≤ 40 mm deep behind the panel. | HT-1 (inspection) |
 | FR-020 | The Module MUST draw ≤ 120 mA from +12 V and ≤ 50 mA from −12 V, and MUST survive reversed power. | HT-1 |
-| FR-021 | The Module MUST provide ≥ 1 pitch output at 1 V/oct, ±1 cent per octave over 5 octaves after calibration; ≥ 4 CV outputs; ≥ 4 gate/trigger outputs; 1 clock and 1 reset output. | HT-2, HT-3 |
-| FR-022 | Latency from host send to jack MUST be ≤ 2 ms at p99. | HT-4 |
+| FR-021 | The Module MUST provide ≥ 1 pitch output at 1 V/oct, ±1 cent per octave over 5 octaves after calibration, with static error within ±0.5 mV at every calibration point and a 1 V step within 1 cent (833 µV) inside 200 µs, measured at the jack (operator decision C5); ≥ 4 CV outputs; ≥ 4 gate/trigger outputs; 1 clock and 1 reset output. | HT-2, HT-3 |
+| FR-022 | Playout error MUST be ≤ 100 µs RMS: each event leaves the jack within that of its scheduled time. The host MUST send each event at least 5 ms ahead. (Restated from "≤ 2 ms p99 from host send to jack", which scheduled playout cannot meet by design; operator decision C6.) | HT-4 |
 | FR-023 | Clock jitter MUST be ≤ 100 µs RMS against the host clock, ≤ 50 µs following the clock input. | HT-2 |
 | FR-024 | Every output MUST survive an indefinite short to +12 V, −12 V or ground. | HT-5 |
 | FR-025 | Identical Output Streams MUST produce identical logic-analyzer captures. | HT-6 |
@@ -139,7 +139,7 @@ Acceptance criteria:
 | SC-002 | 0 Output Events play after Timing Loss. | AT-018 | Met in simulation [OBSERVED] |
 | SC-003 | 4 of 4 existing contracts compile to an Output Stream with 0 changes to their schemas. | AT-006 to AT-010, AT-007 | Met [OBSERVED] |
 | SC-004 | 0 connections to a physical device succeed without a grant. | AT-021 | Met [OBSERVED] |
-| SC-005 | Latency ≤ 2 ms p99; jitter ≤ 100 µs RMS. | HT-2, HT-4 | Plan only |
+| SC-005 | Playout error ≤ 100 µs RMS; clock jitter ≤ 100 µs RMS. | HT-2, HT-4 | Plan only |
 | SC-006 | Pitch error ≤ ±1 cent per octave, C0–C5. | HT-3 | Plan only |
 | SC-007 | Two hardware replays give identical captures. | HT-6 | Plan only |
 
@@ -240,19 +240,27 @@ stateDiagram-v2
 
 ## Open clarifications
 
-In priority order. None blocks the transport choice.
+The operator accepted every recommended answer in `docs/decisions/2026-11-12-operator-decisions.md` on 2026-11-12. What that settled is listed under "Decided". These remain open:
 
-1. `[NEEDS CLARIFICATION: operator decision on hardware lane authority]` Amend Spine 006 and 009, or issue a scoped Hardware Lane Grant.
-2. `[NEEDS CLARIFICATION: unit of Pack t and dur]` Beats is INFERRED.
-3. `[NEEDS CLARIFICATION: is cv.clock_hz meant to track midi.tempo_bpm]`
-4. `[NEEDS CLARIFICATION: BeatOvenRun.v1 schema]` Named in canon, never defined.
-5. `[NEEDS CLARIFICATION: MIDIEventStream.v1 event item shape]`
-6. `[NEEDS CLARIFICATION: voltage ranges]` PROPOSED: pitch 0 to +10 V fixed, mod CV −5 to +5 V fixed.
-7. `[NEEDS CLARIFICATION: gate high level]` PROPOSED: +5 V.
-8. `[NEEDS CLARIFICATION: which note is 0 V]` PROPOSED: C0, MIDI note 12.
-9. `[NEEDS CLARIFICATION: Safe Value policy per Output Channel]` PROPOSED: pitch holds, mod CV slews to 0 V in 50 ms.
-10. `[NEEDS CLARIFICATION: final HP]` PROPOSED: 12 HP.
-11. `[NEEDS CLARIFICATION: product name]`
-12. `[NEEDS CLARIFICATION: is iOS a required host]`
-13. `[NEEDS CLARIFICATION: MIDI manufacturer ID]`
-14. `[NEEDS CLARIFICATION: meaning of RhythmTokens step values and of swing]`
+1. `[NEEDS CLARIFICATION: BeatOvenRun.v1 schema]` Named in canon, never defined.
+2. `[NEEDS CLARIFICATION: MIDIEventStream.v1 event item shape]` ADR 0004 is accepted as this repo's reading; canon itself is unchanged.
+3. `[NEEDS CLARIFICATION: product name]` Decided only that it is not "Kiln" and not "Beatoven".
+4. `[NEEDS CLARIFICATION: CLOCK IN behaviour]` The contract has no message for external sync.
+5. `[NEEDS CLARIFICATION: calibration commands on the Ops lane]`
+6. `[NEEDS CLARIFICATION: meaning of swing in RhythmTokens]` Swing is not applied to what reaches hardware.
+
+## Decided (operator, 2026-11-12)
+
+| Topic | Decision | Brief row |
+|---|---|---|
+| Hardware lane authority | Hardware control is allowed by Hardware Lane Grant only. Canon (Spine 006 and 009) is to be amended to say so; the amendment and the first grant are the operator's to make. Code stays deny by default. | A1 |
+| Unit of Pack `t` and `dur` | Bars. | B1 |
+| Clock | Derived from `midi.tempo_bpm` at 24 pulses per quarter note by default; `cv.clock_hz` is not used. | B2, B3 |
+| 0 V note | C0, MIDI note 12, configurable per stream. | B4 |
+| Voltage ranges | Pitch 0 to +10 V. Modulation −5 to +5 V hardware, mapped 0 to +5 V by default. Gate +5 V. | B5, B6, B7 |
+| Trigger length | 5 ms default, 1 ms minimum. | B8 |
+| Safe Value policy | Gates, clock and reset low at once; pitch holds; modulation slews to 0 V in 50 ms. Keepalive timeout 300 ms. | B9 |
+| RhythmTokens steps | A step value is a velocity; a step fires when it is above 0. | B10 |
+| iOS | Not a required host for v1. | B11 |
+| Size | 12 HP. | C2 |
+| MIDI manufacturer ID | `0x7D` for prototypes; an assigned ID before anything ships. | D2 |

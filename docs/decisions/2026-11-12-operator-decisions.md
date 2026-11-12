@@ -1,10 +1,9 @@
 # Decisions waiting on the operator, with a recommended answer for each
 
-Date: 2026-11-12. Nothing here is decided. Each row gives the answer I would pick, why, and the next-best option.
+Date: 2026-11-12. **Status: the operator accepted every recommended answer on 2026-11-12** ("Yes, accept all"). The "Recommended answer" column is therefore the decision; "Next-best" is kept for the record. What has been applied, and what is still the operator's to do, is in [applied.md](applied.md).
 
 Sources are in [research/](research/): `decisions-parts.md` (P), `decisions-conventions.md` (C) and `decisions-remaining.md` (R, gathered through context.dev) and `open-questions.md` (Q, a second pass that checked each answer against the primary document). The hardware review is in the Kiln repository, `docs/rev-a-review-fixes.md`. Labels: OBSERVED (read in a cited source), INFERRED (reasoned), SPECULATIVE.
 
-To answer, reply with the row numbers you accept and your own answer for the rest.
 
 ## A. Authority and canon (no research can settle these)
 

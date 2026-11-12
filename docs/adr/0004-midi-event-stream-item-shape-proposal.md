@@ -1,6 +1,6 @@
 # 4. MIDIEventStream.v1 event shape (proposal for canon)
 
-Status: PROPOSED. The Notion schema is unchanged; this repo cannot edit it.
+Status: ACCEPTED by the operator on 2026-11-12 as this repo's reading (decision A3). The Notion schema is unchanged; this repo cannot edit it.
 
 ## Context
 

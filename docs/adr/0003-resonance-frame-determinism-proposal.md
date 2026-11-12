@@ -1,6 +1,6 @@
 # 3. Deterministic ResonanceFrame identity (proposal)
 
-Status: PROPOSED. `ResonanceFrame` is unchanged by this document.
+Status: ACCEPTED by the operator on 2026-11-12 (decisions A3, B10). Not implemented yet; `ResonanceFrame` is unchanged.
 
 ## Context
 

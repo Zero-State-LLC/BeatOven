@@ -11,10 +11,22 @@ Schema identifiers such as `beatoven.pack.v0` and `beatoven.output_stream.v1` ar
 - Decision brief with a recommended answer for every open operator decision (`docs/decisions/`).
 - Research pass over the remaining open questions, with each answer checked against its primary source (`docs/decisions/research/open-questions.md`).
 
+### Fixed
+
+- A stream could end with the clock jack high when the clock stop fell inside a pulse.
+- `infer_era_from_heuristics` returns `unknown` for featureless input (issue #22).
+
+### Removed
+
+- Azure deploy workflow, `render.yaml`, `Dockerfile` and `.azure/`. The API is not hosted.
+
 ### Changed
 
+- **Operator decisions of 2026-11-12 applied** (`docs/decisions/applied.md`). Pack times are read as bars. The clock follows tempo at 24 pulses per quarter note and `cv.clock_hz` is no longer used. Keepalive timeout is 300 ms and the driver syncs every 100 ms. A RhythmTokens step fires above 0. These change the default output of `from_pack`, `from_resonance_frame` and `from_audio_control_frames`; pass `time_unit`, `clock_ppqn` or `step_threshold` for the old behaviour.
+- **Golden vectors regenerated** (`beatoven/output_module/vectors/`): new `stream_id` `08592ce0…`, trace `ed5f5523…`. The hardware repository must re-vendor them.
+- Constitution ratified as 1.0.0. ADRs 0002 to 0004 accepted.
+- Spec: latency requirement restated as playout error; pitch settling requirement stated.
 - CI runs the full test suite and tests the Output Module on Python 3.10, 3.11 and 3.13. The minimum Python is now 3.10; 3.9 is past end of life and cannot be tested on current CI runners.
-- `test_infer_era_unknown` is marked as an expected failure until issue #22 is decided.
 
 ## [1.1.0] - 2026-11-12
 

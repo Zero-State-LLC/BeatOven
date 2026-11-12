@@ -109,7 +109,7 @@ F0 7D 'B' 'O' <proto=1> <type> <seq> <7-bit packed (body + CRC-16/CCITT-FALSE)> 
 
 ### Timing loss, defined
 
-`fail_closed_on_timing_loss` now means: on any of `LATE_EVENT`, `SEQUENCE_GAP`, `INTEGRITY`, `KEEPALIVE_TIMEOUT` (500 ms without a frame while events are outstanding), `SYNC_TIMEOUT` (2 s without a sync while idle), `QUEUE_OVERFLOW` or `HOST_ABORT`, the device drops its queue, sets gates, clock and reset low at once, and takes each CV channel to its Safe Value by its policy. It then reports `SAFE_IDLE` and waits for a fresh sync.
+`fail_closed_on_timing_loss` now means: on any of `LATE_EVENT`, `SEQUENCE_GAP`, `INTEGRITY`, `KEEPALIVE_TIMEOUT` (300 ms without a frame while events are outstanding), `SYNC_TIMEOUT` (2 s without a sync while idle), `QUEUE_OVERFLOW` or `HOST_ABORT`, the device drops its queue, sets gates, clock and reset low at once, and takes each CV channel to its Safe Value by its policy. It then reports `SAFE_IDLE` and waits for a fresh sync.
 
 ## Migration table
 
