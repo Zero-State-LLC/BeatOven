@@ -1,0 +1,135 @@
+{
+  "schema": "beatoven.output_module_lifecycle.v1",
+  "initial": "DISCONNECTED",
+  "final": [
+    "DISCONNECTED"
+  ],
+  "states": [
+    "DISCONNECTED",
+    "ENUMERATING",
+    "SYNCED",
+    "STREAMING",
+    "TIMING_LOST",
+    "SAFE_IDLE"
+  ],
+  "events": [
+    "attach",
+    "sync_ok",
+    "reject",
+    "stream_begin",
+    "stream_end",
+    "timing_loss",
+    "safe_reached",
+    "resync",
+    "detach"
+  ],
+  "loss_reasons": [
+    "LATE_EVENT",
+    "SEQUENCE_GAP",
+    "INTEGRITY",
+    "KEEPALIVE_TIMEOUT",
+    "SYNC_TIMEOUT",
+    "QUEUE_OVERFLOW",
+    "HOST_ABORT"
+  ],
+  "transitions": [
+    {
+      "from": "DISCONNECTED",
+      "event": "attach",
+      "guard": "transport link is up",
+      "to": "ENUMERATING",
+      "effect": "drive all outputs safe; exchange the Descriptor"
+    },
+    {
+      "from": "ENUMERATING",
+      "event": "detach",
+      "guard": "transport link is down",
+      "to": "DISCONNECTED",
+      "effect": "drive all outputs safe"
+    },
+    {
+      "from": "ENUMERATING",
+      "event": "reject",
+      "guard": "Descriptor invalid, version mismatch, or hardware lane denied",
+      "to": "SAFE_IDLE",
+      "effect": "outputs stay safe; report the reason"
+    },
+    {
+      "from": "ENUMERATING",
+      "event": "sync_ok",
+      "guard": "Descriptor accepted, contract version matches, hardware lane granted",
+      "to": "SYNCED",
+      "effect": "record the clock offset"
+    },
+    {
+      "from": "SYNCED",
+      "event": "detach",
+      "guard": "transport link is down",
+      "to": "DISCONNECTED",
+      "effect": "drive all outputs safe"
+    },
+    {
+      "from": "SYNCED",
+      "event": "stream_begin",
+      "guard": "stream fits the Descriptor and starts at least min lead in the future",
+      "to": "STREAMING",
+      "effect": "arm the scheduler"
+    },
+    {
+      "from": "SYNCED",
+      "event": "timing_loss",
+      "guard": "no sync within the sync timeout",
+      "to": "TIMING_LOST",
+      "effect": "apply fail-closed outputs"
+    },
+    {
+      "from": "STREAMING",
+      "event": "detach",
+      "guard": "transport link is down",
+      "to": "DISCONNECTED",
+      "effect": "drive all outputs safe"
+    },
+    {
+      "from": "STREAMING",
+      "event": "stream_end",
+      "guard": "every event has played",
+      "to": "SYNCED",
+      "effect": "gates low, clock stopped, CV held; report the played hash"
+    },
+    {
+      "from": "STREAMING",
+      "event": "timing_loss",
+      "guard": "late event, sequence gap, integrity failure, keepalive timeout, overflow or host abort",
+      "to": "TIMING_LOST",
+      "effect": "drop the queue; apply fail-closed outputs"
+    },
+    {
+      "from": "TIMING_LOST",
+      "event": "detach",
+      "guard": "transport link is down",
+      "to": "DISCONNECTED",
+      "effect": "drive all outputs safe"
+    },
+    {
+      "from": "TIMING_LOST",
+      "event": "safe_reached",
+      "guard": "every output is at its safe value",
+      "to": "SAFE_IDLE",
+      "effect": "report status"
+    },
+    {
+      "from": "SAFE_IDLE",
+      "event": "detach",
+      "guard": "transport link is down",
+      "to": "DISCONNECTED",
+      "effect": "drive all outputs safe"
+    },
+    {
+      "from": "SAFE_IDLE",
+      "event": "resync",
+      "guard": "a fresh sync exchange succeeded",
+      "to": "SYNCED",
+      "effect": "record the clock offset"
+    }
+  ]
+}

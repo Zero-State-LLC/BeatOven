@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "beatoven.output_stream.v1.schema.json",
+  "title": "BeatOven Output Stream v1",
+  "description": "Canonical hardware contract. Time in microseconds, CV in microvolts at the jack, pulse widths in microseconds. Data only: it grants no authority to drive hardware.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "stream_id",
+    "source",
+    "clock_pulse_us",
+    "duration_us",
+    "events"
+  ],
+  "properties": {
+    "schema": {
+      "const": "beatoven.output_stream.v1"
+    },
+    "stream_id": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract",
+        "hash"
+      ],
+      "properties": {
+        "contract": {
+          "type": "string"
+        },
+        "hash": {
+          "type": "string"
+        },
+        "seed": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      }
+    },
+    "clock_pulse_us": {
+      "type": "integer",
+      "minimum": 1000,
+      "maximum": 10000000
+    },
+    "duration_us": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "t_us",
+          "ch",
+          "op",
+          "value"
+        ],
+        "properties": {
+          "t_us": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1099511627775
+          },
+          "ch": {
+            "type": "string",
+            "pattern": "^(PITCH_CV|MOD_CV|GATE|CLOCK|RESET):(1[0-5]|[0-9])$"
+          },
+          "op": {
+            "enum": [
+              "SET_UV",
+              "GATE_ON",
+              "GATE_OFF",
+              "PULSE",
+              "CLOCK_PERIOD"
+            ]
+          },
+          "value": {
+            "type": "integer",
+            "minimum": -2147483648,
+            "maximum": 2147483647
+          }
+        }
+      }
+    }
+  }
+}
