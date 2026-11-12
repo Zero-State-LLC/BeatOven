@@ -7,7 +7,7 @@
 <p align="center">
   <a href="https://github.com/Zero-State-LLC/BeatOven/actions/workflows/test-output-module.yml"><img src="https://github.com/Zero-State-LLC/BeatOven/actions/workflows/test-output-module.yml/badge.svg?branch=main" alt="Output Module tests" /></a>
   <a href="https://github.com/Zero-State-LLC/BeatOven/releases"><img src="https://img.shields.io/github/v/release/Zero-State-LLC/BeatOven?include_prereleases&label=release" alt="Latest release" /></a>
-  <a href="pyproject.toml"><img src="https://img.shields.io/badge/python-3.9%2B-blue" alt="Python 3.9 or later" /></a>
+  <a href="pyproject.toml"><img src="https://img.shields.io/badge/python-3.10%2B-blue" alt="Python 3.10 or later" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-green" alt="Apache 2.0 license" /></a>
   <a href="specs/001-output-module/spec.md"><img src="https://img.shields.io/badge/hardware%20control-denied%20by%20default-orange" alt="Hardware control is denied by default" /></a>
   <a href="docs/handoff/NEXT.md"><img src="https://img.shields.io/badge/hardware-not%20built-red" alt="No hardware has been built" /></a>

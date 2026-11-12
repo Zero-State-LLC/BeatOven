@@ -8,7 +8,7 @@ Schema identifiers such as `beatoven.pack.v0` and `beatoven.output_stream.v1` ar
 
 ### Changed
 
-- CI runs the full test suite and tests the Output Module on Python 3.9, 3.11 and 3.13.
+- CI runs the full test suite and tests the Output Module on Python 3.10, 3.11 and 3.13. The minimum Python is now 3.10; 3.9 is past end of life and cannot be tested on current CI runners.
 - `test_infer_era_unknown` is marked as an expected failure until issue #22 is decided.
 
 ## [1.1.0] - 2026-11-12
