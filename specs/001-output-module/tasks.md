@@ -54,10 +54,12 @@
 
 ## Polish
 
-- [ ] 001-T090 Converge the code against the spec after the operator's rulings (workflows: anti-slop-code)
+- [x] 001-T090 Converge the code against the spec after the operator's rulings of 2026-11-12 (`docs/decisions/applied.md`) (workflows: anti-slop-code)
 - [x] 001-T091 Add a CI job for the Output Module tests, the traceability check and the replay check (workflows: production-systems)
 - [x] 001-T092 Fix the API tests that failed on NumPy 2 (workflows: anti-slop-code)
-- [ ] 001-T095 Operator decides `test_infer_era_unknown`: the test expects `unknown` for zero sharpness, the code returns `1990s` (workflows: anti-slop-code)
+- [x] 001-T095 Operator decided `test_infer_era_unknown` (2026-11-12): the code now returns `unknown` for featureless input (workflows: anti-slop-code)
 - [x] 001-T093 One-way link mode: FR-026 (workflows: anti-slop-code, production-systems)
+- [x] 001-T097 Implement Pack v1 and `ResonanceFrame.from_source` (ADRs 0002, 0003): FR-006 (workflows: anti-slop-code)
+- [ ] 001-T098 Operator rules on ADRs 0005 (CLOCK IN) and 0006 (calibration commands) (workflows: google-developer-style)
 - [ ] 001-T096 Plain play-on-arrival MIDI mode, labelled non-deterministic (workflows: anti-slop-code, production-systems)
 - [x] 001-T094 README: mark the "<1ms" latency claim as unmeasured and point to this spec (workflows: google-developer-style)

@@ -14,5 +14,5 @@
 - [x] Canonical hardware contract and migration table in `plan.md`
 - [x] `GLOSSARY.md` delta table with source and reason; no implementation detail
 - [ ] `spec-lint --strict` exits 0: **not run**; `/workspace/tools/skillbin/bin/spec-lint` does not exist on this machine
-- [ ] Operator has confirmed the INFERRED and PROPOSED items
+- [x] Operator has confirmed the INFERRED and PROPOSED items (2026-11-12, all 28 rows of `docs/decisions/2026-11-12-operator-decisions.md`). Six clarifications remain open in `spec.md`
 - [ ] Hardware acceptance (HT-1 to HT-6) measured: **plan only**
