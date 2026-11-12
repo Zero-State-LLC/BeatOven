@@ -96,11 +96,14 @@
 
 **Two-lane architecture** for reliable hardware control:
 
+> **Status, 2026-11-11.** No dsp.coffee firmware exists for this bridge, so it has never driven a device. The path to hardware is now the Output Stream in `beatoven/output_module/` (spec: `specs/001-output-module/`). Hardware control is denied by default and needs an operator grant.
+
+
 #### Lane A: Realtime (UDP)
 - **Protocol**: OSC-compatible newline-delimited messages
 - **Purpose**: Low-latency macro/param updates
 - **Messages**: `/macro <preset_id> <name> <value>`, `/meta bpm <value>`
-- **Latency**: <1ms
+- **Latency**: not measured. An earlier "<1ms" figure had no test behind it; see `specs/001-output-module/audit.md` row 6.
 
 #### Lane B: Reliable Operations (Serial)
 - **Protocol**: Length-prefixed CBOR frames with ACK
