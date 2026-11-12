@@ -427,3 +427,21 @@ def test_at026_one_way_link_too_slow_for_the_stream_fails_closed():
         if kind == "LEVEL":
             levels[jack] = value
     assert set(levels.values()) <= {0}
+
+
+# ---- clock drift (FR-013) ------------------------------------------------------------
+
+@pytest.mark.parametrize("ppm", [-40_000, 40_000])
+def test_at029_host_follows_a_drifting_device_clock(ppm):
+    """A crystal error far beyond any real part; uncorrected, it would exceed the look-ahead."""
+    _, reference, _, ref_driver = rig()
+    ref_driver.connect()
+    assert ref_driver.play(stream()).ok
+
+    clock = VirtualClock(1_000_000)
+    device = SimulatedOutputModule(clock_offset_us=777, clock_ppm=ppm)
+    driver = OutputModuleDriver(LoopbackTransport(device, clock), clock, sync_interval_us=50_000)
+    driver.connect()
+    report = driver.play(stream())
+    assert report.ok and report.played_hash_ok, report
+    assert device.trace_csv() == reference.trace_csv()  # the device's own timeline is unchanged

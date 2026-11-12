@@ -115,7 +115,7 @@ Acceptance criteria:
 | FR-010 | Every frame on the host link MUST be integrity-checked and MUST use only byte values below 128 between its markers. | AT-012 |
 | FR-011 | Ops lane kinds, nonce and acknowledgement MUST be carried unchanged in meaning. | AT-013 |
 | FR-012 | The connection MUST follow the transitions table. Any other transition MUST be refused. | AT-014, AT-015 |
-| FR-013 | The Output Module MUST play each Output Event at its stated time on its own clock, independent of when the event arrived and of the clock's starting value. | AT-016 |
+| FR-013 | The Output Module MUST play each Output Event at its stated time on its own clock, independent of when the event arrived and of the clock's starting value. The host MUST keep following the Output Module's clock while a stream plays. | AT-016, AT-029 |
 | FR-014 | On Timing Loss the Output Module MUST, at once, set gates, clock and reset low, discard queued events, and take each CV Output Channel to its Safe Value by its stated policy (hold, or slew). | AT-017, AT-018 |
 | FR-015 | Play MUST NOT resume after Timing Loss without a fresh sync requested by the host. | AT-019 |
 | FR-016 | At stream end the Output Module MUST report a hash of the events it played. | AT-015 |

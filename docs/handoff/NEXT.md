@@ -27,7 +27,6 @@ Updated 2026-11-11, branch `feat/output-module-contract`.
 
 ## Known issues in the reference device (found while porting to firmware; see Kiln `docs/firmware-architecture.md` §10)
 
-- `driver.py`: the clock offset is computed once at connect. Sync replies during play are dropped, so drift is not corrected within a stream.
 - `sim.py`: timeouts are checked after due events play; `queue_capacity` counts internal entries; fail-closed records the nominal Safe Value, not the quantized one; `ENUMERATING` has no device-side timeout.
 - The "≤ 2 ms p99 latency" target conflicts with scheduled playout (events are sent 20–70 ms early). It should probably be restated as playout error. Operator call.
 - On a one-way link, a host keepalive re-syncs a device that has failed closed. Nothing replays, but the host cannot tell it happened.
