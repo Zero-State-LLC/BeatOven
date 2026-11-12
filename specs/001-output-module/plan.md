@@ -103,8 +103,8 @@ F0 7D 'B' 'O' <proto=1> <type> <seq> <7-bit packed (body + CRC-16/CCITT-FALSE)> 
 
 1. The host sends `SYNC` with its monotonic time. The device answers with its own time. Offset = device time − host send time − round trip ÷ 2.
 2. `STREAM_BEGIN` names the start in device time. From then on the device's clock alone decides when each event plays.
-3. The host sends each event when it is within the look-ahead (default 50 ms) of its due time. The device needs it at least `min_lead_us` (default 5 ms) before the stream starts.
-4. Budget [INFERRED; to be confirmed by HT-2 and HT-4]: link arrival jitter up to about 1.4 ms [OBSERVED: research/transport-facts.md §1.2] is absorbed by the 50 ms look-ahead. Jitter at the jack is then the device timer resolution plus DAC write time, targeted at ≤ 100 µs RMS.
+3. The host sends each event when it is within the look-ahead (default 100 ms) of its due time. The device needs it at least `min_lead_us` (default 5 ms) before the stream starts.
+4. Budget [INFERRED; to be confirmed by HT-2 and HT-4]: link arrival jitter up to about 1.4 ms [OBSERVED: research/transport-facts.md §1.2] is absorbed by the 100 ms look-ahead. Jitter at the jack is then the device timer resolution plus DAC write time, targeted at ≤ 100 µs RMS.
 5. Sync error shifts the whole stream by a constant; it does not add jitter between events.
 
 ### Timing loss, defined

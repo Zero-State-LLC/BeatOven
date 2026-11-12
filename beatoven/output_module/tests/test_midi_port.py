@@ -6,6 +6,7 @@ latency figures.
 """
 
 import json
+import sys
 import time
 
 import pytest
@@ -19,8 +20,26 @@ from beatoven.output_module.midi_port import MidiPortTransport, SimulatedPortDev
 from beatoven.output_module.tests.test_output_module import stream  # noqa: E402
 
 
+def _midi_backend_usable() -> bool:
+    """Create one MIDI client in a child process.
+
+    python-rtmidi aborts the whole interpreter, rather than raising, when the
+    OS refuses to create a client (seen on macOS CoreMIDI in about one process
+    start in five when processes start back to back). A child process turns
+    that abort into a result this process can read.
+    """
+    import subprocess
+    probe = "import rtmidi; i = rtmidi.MidiIn(); o = rtmidi.MidiOut(); i.delete(); o.delete()"
+    try:
+        return subprocess.run([sys.executable, "-c", probe], capture_output=True, timeout=20).returncode == 0
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+
+
 @pytest.fixture
 def port_device():
+    if not _midi_backend_usable():
+        pytest.skip("the MIDI backend aborted or is missing; not a result about BeatOven")
     try:
         dev = SimulatedPortDevice(name=f"OM Sim {time.monotonic_ns() % 100000}")
     except Exception as exc:  # no MIDI backend on this machine

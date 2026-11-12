@@ -124,7 +124,7 @@ class OutputModuleDriver:
         transport: Transport,
         clock: Optional[Clock] = None,
         grant: Optional[HardwareLaneGrant] = None,
-        lookahead_us: int = 50_000,
+        lookahead_us: int = 100_000,
         lead_us: int = 20_000,
         sync_interval_us: int = 100_000,
         reply_timeout_us: int = 1_000_000,

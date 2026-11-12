@@ -27,7 +27,6 @@ The operator accepted every recommended answer on 2026-11-12. What was applied i
 1. Rule on the PROPOSED ADRs 0005 (`CLOCK IN`) and 0006 (calibration commands). Operator.
 2. Implement whichever of them is accepted, in the reference device first, then in Kiln's firmware.
 3. 001-T096: play-on-arrival mode (issue #23).
-4. Raise the default look-ahead to 100 ms (issue #24).
 
 ## Known issues in the reference device (found while porting to firmware; see Kiln `docs/firmware-architecture.md` §10)
 
@@ -37,7 +36,7 @@ The operator accepted every recommended answer on 2026-11-12. What was applied i
 
 ## Measured (software path only)
 
-- Sync round trip over CoreMIDI virtual ports, macOS 26.3.1, Apple M4, 1000 exchanges: p50 916 µs, p99 7375 µs, max 47772 µs. No USB and no hardware in that path. Use a look-ahead of 100 ms or more from a Python host; the default is still 50 ms because the firmware test harness mirrors it.
+- Sync round trip over CoreMIDI virtual ports, macOS 26.3.1, Apple M4, 1000 exchanges: p50 916 µs, p99 7375 µs, max 47772 µs. No USB and no hardware in that path. The default look-ahead is 100 ms for that reason (issue #24, done 2026-11-12).
 
 ## Not verified
 
