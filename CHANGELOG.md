@@ -16,6 +16,7 @@ Schema identifiers such as `beatoven.pack.v0` and `beatoven.output_stream.v1` ar
 
 ### Fixed
 
+- The MIDI port tests no longer crash the whole test run when the operating system refuses to create a MIDI client; they probe in a child process and skip. Before this, 5 of 25 back-to-back runs aborted inside python-rtmidi on macOS.
 - A stream could end with the clock jack high when the clock stop fell inside a pulse.
 - `infer_era_from_heuristics` returns `unknown` for featureless input (issue #22).
 
@@ -27,6 +28,7 @@ Schema identifiers such as `beatoven.pack.v0` and `beatoven.output_stream.v1` ar
 
 - **Operator decisions of 2026-11-12 applied** (`docs/decisions/applied.md`). Pack times are read as bars. The clock follows tempo at 24 pulses per quarter note and `cv.clock_hz` is no longer used. Keepalive timeout is 300 ms and the driver syncs every 100 ms. A RhythmTokens step fires above 0. These change the default output of `from_pack`, `from_resonance_frame` and `from_audio_control_frames`; pass `time_unit`, `clock_ppqn` or `step_threshold` for the old behaviour.
 - **Golden vectors regenerated** (`beatoven/output_module/vectors/`): new `stream_id` `08592ce0…`, trace `ed5f5523…`. The hardware repository must re-vendor them.
+- Default look-ahead in the host driver is 100 ms (was 50), after the sync round trip measured up to 48 ms through the OS MIDI stack. **Golden vectors regenerated again** (frame send times change; the jack trace does not).
 - Constitution ratified as 1.0.0. ADRs 0002 to 0004 accepted.
 - Spec: latency requirement restated as playout error; pitch settling requirement stated.
 - CI runs the full test suite and tests the Output Module on Python 3.10, 3.11 and 3.13. The minimum Python is now 3.10; 3.9 is past end of life and cannot be tested on current CI runners.

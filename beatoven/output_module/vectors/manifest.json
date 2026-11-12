@@ -1,7 +1,7 @@
 {
   "stream_id": "08592ce044c9a55020edcc006429d4720ede751373da3da400ca6ed516aa872a",
   "trace_sha256": "ed5f5523f72375e7eb6b60fa5756e9a0e2cd25e0482f86b801eb3ecd276ca92d",
-  "frames": 90,
+  "frames": 89,
   "events": 77,
   "host_clock_start_us": 1000000,
   "device_clock_offset_us": 0,
