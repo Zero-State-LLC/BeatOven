@@ -6,6 +6,11 @@ Schema identifiers such as `beatoven.pack.v0` and `beatoven.output_stream.v1` ar
 
 ## [Unreleased]
 
+### Changed
+
+- CI runs the full test suite and tests the Output Module on Python 3.9, 3.11 and 3.13.
+- `test_infer_era_unknown` is marked as an expected failure until issue #22 is decided.
+
 ## [1.1.0] - 2026-11-12
 
 First tagged release. The repository was unarchived on 2026-11-11.

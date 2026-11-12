@@ -21,7 +21,7 @@ python scripts/check_spec_trace.py
 python -m beatoven.output_module replay-check beatoven/output_module/vectors/stream.json
 ```
 
-The wider suite is `python -m pytest`. It needs `opencv-python-headless` for the media intelligence tests. One test there, `test_infer_era_unknown`, is known to fail.
+The wider suite is `python -m pytest`. It needs `opencv-python-headless` for the media intelligence tests. One test there, `test_infer_era_unknown`, is marked as an expected failure (issue #22).
 
 ## Rules that reviewers hold you to
 
