@@ -4,7 +4,7 @@
 
 1. Read [FACTS.md](FACTS.md) and [docs/handoff/NEXT.md](docs/handoff/NEXT.md).
 2. Use the words in [GLOSSARY.md](GLOSSARY.md).
-3. Check the project board for an existing item.
+3. Check the [project board](https://github.com/orgs/Zero-State-LLC/projects/33) for an existing item. It is private to the organization.
 
 ## Set up
 
@@ -36,7 +36,7 @@ The wider suite is `python -m pytest`. It needs `opencv-python-headless` for the
 
 - Branch from `main`: `feat/...`, `fix/...`, `docs/...`, `chore/...`.
 - One logical change per pull request. Say what you verified and what you did not.
-- Merged branches are deleted automatically.
+- Delete your branch after it merges.
 
 ## Versioning and releases
 

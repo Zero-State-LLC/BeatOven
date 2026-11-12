@@ -15,4 +15,4 @@ Read [FACTS.md](FACTS.md) and [docs/handoff/NEXT.md](docs/handoff/NEXT.md) first
 - Use the words in [GLOSSARY.md](GLOSSARY.md). The hardware is "the Output Module (PROPOSED)". Never write "Beatoven" for this project.
 - Label claims OBSERVED, INFERRED or SPECULATIVE in specs and research. Never report a plan as a measurement.
 - If `beatoven/output_module/vectors/` changes, say so: the hardware repository vendors it.
-- Hand-offs go in `docs/handoff/NEXT.md`.
+- Hand-offs go in `docs/handoff/NEXT.md`. Open work is tracked on the project board: https://github.com/orgs/Zero-State-LLC/projects/33

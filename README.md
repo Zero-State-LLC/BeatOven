@@ -97,6 +97,7 @@ print(report.ok, device.trace_hash())
 | [GLOSSARY.md](GLOSSARY.md) | The words this project uses |
 | [docs/handoff/NEXT.md](docs/handoff/NEXT.md) | Current state and what is next |
 | [CHANGELOG.md](CHANGELOG.md) | What changed in each version |
+| [Project board](https://github.com/orgs/Zero-State-LLC/projects/33) | Open work across BeatOven and Kiln (organization members only) |
 
 ## Project rules
 
