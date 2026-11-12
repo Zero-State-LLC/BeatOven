@@ -49,7 +49,8 @@
 - [x] 001-T053 Panel drawing with jack and LED coordinates: FR-019 (workflows: google-developer-style)
 - [ ] 001-T054 Build boards; run HT-1, HT-2, HT-3, HT-5: FR-020, FR-021, FR-023, FR-024 (workflows: production-systems)
 - [ ] 001-T055 Run HT-4 and HT-6 on hardware: FR-022, FR-025 (workflows: production-systems)
-- [ ] 001-T056 Real MIDI port transport in the host driver, behind the grant: FR-017, FR-022 (workflows: anti-slop-code, production-systems)
+- [x] 001-T056 Real MIDI port transport in the host driver, behind the grant, tested over virtual ports: FR-017, FR-027 (workflows: anti-slop-code, production-systems)
+- [ ] 001-T057 Measure host-to-jack latency on hardware: FR-022 (workflows: production-systems)
 
 ## Polish
 

@@ -119,9 +119,10 @@ Acceptance criteria:
 | FR-014 | On Timing Loss the Output Module MUST, at once, set gates, clock and reset low, discard queued events, and take each CV Output Channel to its Safe Value by its stated policy (hold, or slew). | AT-017, AT-018 |
 | FR-015 | Play MUST NOT resume after Timing Loss without a fresh sync requested by the host. | AT-019 |
 | FR-016 | At stream end the Output Module MUST report a hash of the events it played. | AT-015 |
-| FR-017 | The Hardware Lane MUST be closed by default. Only a Hardware Lane Grant that names the Output Module scope opens it. | AT-021 |
+| FR-017 | The Hardware Lane MUST be closed by default. Only a Hardware Lane Grant that names the Output Module scope opens it. | AT-021, AT-027 |
 | FR-018 | A simulated Output Module MUST produce a Jack Trace for any Output Stream, with no grant. | AT-016 |
 | FR-026 | On a link with no return path the Output Module MUST still schedule every event from a start it derives on receipt, and the host MUST report the run as unconfirmed. A link too slow for the stream MUST end in Timing Loss, not late notes. | AT-025, AT-026 |
+| FR-027 | The host MUST be able to play an Output Stream through the operating system's own MIDI ports, with the same Jack Trace as in simulation. | AT-028 |
 | FR-019 | The Module MUST be 3U (128.5 mm panel) and ≤ 12 HP `[NEEDS CLARIFICATION: final HP]`, and ≤ 40 mm deep behind the panel. | HT-1 (inspection) |
 | FR-020 | The Module MUST draw ≤ 120 mA from +12 V and ≤ 50 mA from −12 V, and MUST survive reversed power. | HT-1 |
 | FR-021 | The Module MUST provide ≥ 1 pitch output at 1 V/oct, ±1 cent per octave over 5 octaves after calibration; ≥ 4 CV outputs; ≥ 4 gate/trigger outputs; 1 clock and 1 reset output. | HT-2, HT-3 |
