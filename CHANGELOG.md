@@ -8,6 +8,9 @@ Schema identifiers such as `beatoven.pack.v0` and `beatoven.output_stream.v1` ar
 
 ### Added
 
+- `beatoven.pack.v1` (ADR 0002): `render_pack(..., schema_version="v1")` states the time unit and clock rate and embeds the Output Stream. v0 is still the default and is unchanged.
+- `ResonanceFrame.from_source`, a deterministic constructor (ADR 0003).
+- Proposed ADRs 0005 (CLOCK IN) and 0006 (calibration commands).
 - Decision brief with a recommended answer for every open operator decision (`docs/decisions/`).
 - Research pass over the remaining open questions, with each answer checked against its primary source (`docs/decisions/research/open-questions.md`).
 

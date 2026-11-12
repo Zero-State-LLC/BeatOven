@@ -1,6 +1,6 @@
 # Next
 
-Updated 2026-11-12, branch `docs/operator-decisions`.
+Updated 2026-11-12, branch `feat/pack-v1-and-frame-determinism`.
 
 ## State
 
@@ -8,7 +8,7 @@ Updated 2026-11-12, branch `docs/operator-decisions`.
 
 - Software for the Output Module is implemented and tested in simulation: `beatoven/output_module/`, spec in `specs/001-output-module/`.
 - Run the checks:
-  - `python -m pytest beatoven/output_module` (38 tests; 2 need `python-rtmidi` and a MIDI backend, else they skip)
+  - `python -m pytest beatoven/output_module` (40 tests; 2 need `python-rtmidi` and a MIDI backend, else they skip)
   - `python scripts/check_spec_trace.py` (traceability; stands in for spec-lint, which is not on this machine)
   - `python -m beatoven.output_module replay-check <stream.json>`
 - Hardware is in the Kiln repo. No board exists. Every bench number there is a plan.
@@ -23,8 +23,8 @@ The operator accepted every recommended answer on 2026-11-12. What was applied i
 
 ## Next work, in order
 
-1. Implement the accepted ADRs: `beatoven.pack.v1` (0002), ResonanceFrame determinism (0003).
-2. Write ADRs for `CLOCK IN` and for calibration commands on the Ops lane.
+1. Rule on the PROPOSED ADRs 0005 (`CLOCK IN`) and 0006 (calibration commands). Operator.
+2. Implement whichever of them is accepted, in the reference device first, then in Kiln's firmware.
 3. 001-T096: play-on-arrival mode (issue #23).
 4. Raise the default look-ahead to 100 ms (issue #24).
 

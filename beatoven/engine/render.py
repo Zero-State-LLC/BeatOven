@@ -16,6 +16,13 @@ from beatoven.engine.mapping import (
 OVERLAY_VERSION = "0.1.0"
 SCHEMA_PATH = Path(__file__).resolve().parents[1] / "schemas" / "beatoven.pack.v0.schema.json"
 
+# beatoven.pack.v1 (ADR 0002, accepted 2026-11-12). v0 stays the default.
+PACK_V1_SCHEMA = "beatoven.pack.v1"
+PACK_V1_OVERLAY_VERSION = "1.0.0"
+PACK_V1_TIME_UNIT = "bars"
+PACK_V1_CLOCK_PPQN = 24
+SCHEMA_V1_PATH = SCHEMA_PATH.with_name("beatoven.pack.v1.schema.json")
+
 
 def _validate_oracle(oracle_v2: dict) -> None:
     if "vector_mix" not in oracle_v2 or "kairos" not in oracle_v2:
@@ -67,13 +74,14 @@ def _session_recipe_markdown(session_recipe: dict) -> str:
     return "\n".join(lines)
 
 
-def _input_hashes(oracle_v2: dict, overlays: dict) -> dict:
-    schema_hash = hash_file(SCHEMA_PATH) if SCHEMA_PATH.exists() else "missing"
+def _input_hashes(oracle_v2: dict, overlays: dict, schema_path: Path = SCHEMA_PATH,
+                  code_version: str = OVERLAY_VERSION) -> dict:
+    schema_hash = hash_file(schema_path) if schema_path.exists() else "missing"
     return {
         "oracle_signal_layer_v2": sha256_json(oracle_v2),
         "overlays": sha256_json(overlays),
         "schema": schema_hash,
-        "code_version": OVERLAY_VERSION,
+        "code_version": code_version,
     }
 
 
@@ -86,7 +94,20 @@ def _overlay_status(overlays: dict) -> dict:
     return status
 
 
-def render_pack(oracle_v2: dict, overlays: dict, seed: int, daw: str, test_mode: bool = False) -> dict:
+def render_pack(
+    oracle_v2: dict, overlays: dict, seed: int, daw: str, test_mode: bool = False,
+    *, schema_version: str = "v0",
+) -> dict:
+    """Render a BeatOven Pack.
+
+    ``schema_version="v0"`` (the default) returns ``beatoven.pack.v0`` exactly
+    as before. ``"v1"`` returns ``beatoven.pack.v1``: times are stated to be in
+    bars, the clock is stated as pulses per quarter note, ``cv`` is gone, and
+    the compiled Output Stream is embedded under ``output_stream``.
+    """
+    if schema_version not in ("v0", "v1"):
+        raise ValueError(f"unknown schema_version: {schema_version!r}")
+    v1 = schema_version == "v1"
     _validate_oracle(oracle_v2)
     vector_mix = oracle_v2["vector_mix"]
     kairos = oracle_v2["kairos"]
@@ -128,12 +149,21 @@ def render_pack(oracle_v2: dict, overlays: dict, seed: int, daw: str, test_mode:
         },
     }
 
-    if vector_mix.get("meme_velocity", 0) > 0.55:
+    if v1:
+        pack["meta"]["schema"] = PACK_V1_SCHEMA
+        pack["meta"]["overlay_version"] = PACK_V1_OVERLAY_VERSION
+        pack["midi"]["time_unit"] = PACK_V1_TIME_UNIT
+        pack["midi"]["clock_ppqn"] = PACK_V1_CLOCK_PPQN
+        pack["provenance"]["input_hashes"] = _input_hashes(
+            oracle_v2, overlays, SCHEMA_V1_PATH, PACK_V1_OVERLAY_VERSION)
+        from beatoven.output_module.adapters import from_pack  # imported here: output_module imports nothing from engine
+        pack["output_stream"] = from_pack(pack).to_dict()
+    elif vector_mix.get("meme_velocity", 0) > 0.55:
         pack["cv"] = map_cv(vector_mix, seed)
 
     if test_mode:
         _, invariance = determinism.run_n_times(
-            lambda: render_pack(oracle_v2, overlays, seed, daw, test_mode=False)
+            lambda: render_pack(oracle_v2, overlays, seed, daw, test_mode=False, schema_version=schema_version)
         )
         if not invariance:
             raise RuntimeError("Determinism drift detected")
@@ -145,6 +175,8 @@ def render_pack(oracle_v2: dict, overlays: dict, seed: int, daw: str, test_mode:
     }
     if pack.get("cv"):
         output_hashes["cv"] = sha256_json(pack["cv"])
+    if pack.get("output_stream"):
+        output_hashes["output_stream"] = pack["output_stream"]["stream_id"]
 
     pack["provenance"]["output_hashes"] = output_hashes
     return pack

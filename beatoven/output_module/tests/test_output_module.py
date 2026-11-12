@@ -454,3 +454,35 @@ def test_at029_host_follows_a_drifting_device_clock(ppm):
     report = driver.play(stream())
     assert report.ok and report.played_hash_ok, report
     assert device.trace_csv() == reference.trace_csv()  # the device's own timeline is unchanged
+
+
+# ---- Pack v1 (ADR 0002) and deterministic ResonanceFrame (ADR 0003) ------------------
+
+def test_pack_v1_states_its_units_and_embeds_the_stream_it_compiles_to():
+    jsonschema = pytest.importorskip("jsonschema")
+    v0 = render_pack(ORACLE, {}, 7, "ableton")
+    v1 = render_pack(ORACLE, {}, 7, "ableton", schema_version="v1")
+    assert v0 == pack(7) and "output_stream" not in v0 and "schema" not in v0["meta"]  # v0 untouched
+    schemas = Path(__file__).parents[2] / "schemas"
+    jsonschema.validate(v1, json.loads((schemas / "beatoven.pack.v1.schema.json").read_text()))
+    jsonschema.validate(v0, json.loads((schemas / "beatoven.pack.v0.schema.json").read_text()))
+    assert v1["midi"]["time_unit"] == "bars" and v1["midi"]["clock_ppqn"] == 24 and "cv" not in v1
+    assert v1 == render_pack(ORACLE, {}, 7, "ableton", schema_version="v1")
+    embedded = OutputStream.from_dict(v1["output_stream"])
+    recompiled = from_pack(v1)
+    assert recompiled.stream_id == embedded.stream_id
+    assert v1["provenance"]["output_hashes"]["output_stream"] == v1["output_stream"]["stream_id"] == "sha256:" + embedded.stream_id
+    assert recompiled.to_dict()["source"]["contract"] == "beatoven.pack.v1"
+    assert from_pack(v1, time_unit="beats").stream_id != embedded.stream_id  # the override still works
+    with pytest.raises(ValueError):
+        render_pack(ORACLE, {}, 7, "ableton", schema_version="v2")
+
+
+def test_resonance_frame_from_source_is_deterministic():
+    from beatoven.dspcoffee_bridge.schema import ResonanceFrame
+    a = ResonanceFrame.from_source("text", id="f1", ts_ms=1000)
+    b = ResonanceFrame.from_source("text", id="f1", ts_ms=1000)
+    assert a == b and a.provenance_hash == b.provenance_hash
+    with pytest.raises(TypeError):
+        ResonanceFrame.from_source("text")
+    assert ResonanceFrame.new("text").id != ResonanceFrame.new("text").id
