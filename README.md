@@ -66,7 +66,7 @@ from beatoven.output_module import (
 )
 
 pack = render_pack(oracle_signal, overlays={}, seed=7, daw="ableton")
-stream = from_pack(pack, time_unit="beats")   # the unit is required; the Pack does not state it
+stream = from_pack(pack)   # Pack times are in bars; the clock follows tempo at 24 pulses per quarter note
 
 clock = VirtualClock()
 device = SimulatedOutputModule()
@@ -80,7 +80,7 @@ print(report.ok, device.trace_hash())
 
 | Command | What it does |
 |---|---|
-| `python -m beatoven.output_module compile PACK --time-unit beats` | Pack JSON to Output Stream JSON |
+| `python -m beatoven.output_module compile PACK` | Pack JSON to Output Stream JSON |
 | `... simulate STREAM` | Play on the simulated device and print the jack trace |
 | `... replay-check STREAM` | Play twice on separately clocked devices and compare |
 | `... ports` | List MIDI ports (needs `pip install -e ".[hardware-midi]"`) |

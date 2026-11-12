@@ -85,8 +85,13 @@ def test_at005_stream_schema_validates_emitted_json():
 # ---- adapters (FR-005..FR-009) ---------------------------------------------------
 
 def test_at006_pack_adapter_requires_time_unit_and_reports_what_it_cannot_map():
-    with pytest.raises(TypeError):
-        from_pack(pack())
+    # Operator decisions B1-B3 (2026-11-12): bars, and a clock from tempo at 24 per quarter note.
+    assert from_pack(pack()).stream_id == from_pack(pack(), time_unit="bars", clock_ppqn=24).stream_id
+    assert from_pack(pack()).stream_id != from_pack(pack(), time_unit="beats").stream_id
+    bpm = pack()["midi"]["tempo_bpm"]
+    clock = [e.value for e in from_pack(pack()).events if e.channel.kind is ChannelKind.CLOCK]
+    assert clock == [round(60_000_000 / (bpm * 24)), 0]
+    assert not [e for e in from_pack(pack(), clock_ppqn=None).events if e.channel.kind is ChannelKind.CLOCK]
     with pytest.raises(ContractError):
         from_pack(pack(), time_unit="ticks")
     notes = "\n".join(stream().notes)
@@ -135,8 +140,10 @@ class _Frame:
 
 def test_at008_resonance_frame_adapter():
     frame = _Frame(metrics=_Metrics(), rhythm=_Rhythm(kick=[1, 0, 0, 0, 1, 0, 0, 0], hat=[0.4] * 8))
-    with pytest.raises(TypeError):
-        from_resonance_frame(frame, bars=1)
+    # Operator decision B10: a step value is a velocity and fires above 0.
+    by_default = from_resonance_frame(frame, bars=1)
+    assert len([e for e in by_default.events if e.channel.name == "GATE:2"]) == 8
+    assert len([e for e in by_default.events if e.channel.name == "GATE:0"]) == 2
     s = from_resonance_frame(frame, bars=2, step_threshold=0.5)
     kicks = [e.t_us for e in s.events if e.channel.name == "GATE:0"]
     assert kicks == [0, 1_000_000, 2_000_000, 3_000_000]
@@ -152,7 +159,7 @@ def test_at009_audio_control_frame_and_cv_gate_map_adapters():
     with pytest.raises(TypeError):
         from_audio_control_frames(frames)
     s = from_audio_control_frames(frames, window_us=2_000_000)
-    assert [e.value for e in s.events if e.channel.kind is ChannelKind.CLOCK] == [125_000, 0]
+    assert [e.value for e in s.events if e.channel.kind is ChannelKind.CLOCK] == [20_833, 0]
     assert [e.value for e in s.events if e.channel.name == "MOD_CV:2"] == [5_000_000, 5_000_000]
     g = from_cv_gate_map({"clock_hz": 2.0, "gate_pattern": "1010"})
     assert [e.t_us for e in g.events if e.op is Op.PULSE] == [0, 1_000_000]
@@ -269,12 +276,14 @@ def test_at018_timing_loss_fails_closed(fault, reason):
 
     def faulty(data):
         count["n"] += 1  # send 1 is STREAM_BEGIN
-        if fault == "drop" and count["n"] == 3:
+        is_events = data[5] == 0x04
+        count["events"] = count.get("events", 0) + is_events
+        if fault == "drop" and is_events and count["events"] == 2:
             return
         if fault == "silent" and count["n"] >= 3:
             return
         if fault == "late" and count["n"] >= 2:
-            transport.delay_us = 400_000
+            transport.delay_us = 200_000  # past the look-ahead, inside the 300 ms keepalive
         original(data)
     transport.send = faulty
     report = driver.play(s)
@@ -298,9 +307,9 @@ def test_at019_no_automatic_resume_after_timing_loss():
     original = transport.send
     sends = []
 
-    def drop_third(data):
-        sends.append(1)
-        if len(sends) != 3:
+    def drop_third(data):  # drops the second EVENTS frame
+        sends.append(data[5] == 0x04)
+        if not (data[5] == 0x04 and sum(sends) == 2):
             original(data)
     transport.send = drop_third
     assert driver.play(stream()).final_state is State.SAFE_IDLE

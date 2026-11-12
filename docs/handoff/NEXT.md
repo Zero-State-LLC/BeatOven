@@ -1,6 +1,6 @@
 # Next
 
-Updated 2026-11-11, branch `feat/output-module-contract`.
+Updated 2026-11-12, branch `docs/operator-decisions`.
 
 ## State
 
@@ -8,29 +8,29 @@ Updated 2026-11-11, branch `feat/output-module-contract`.
 
 - Software for the Output Module is implemented and tested in simulation: `beatoven/output_module/`, spec in `specs/001-output-module/`.
 - Run the checks:
-  - `python -m pytest beatoven/output_module` (36 tests; 2 need `python-rtmidi` and a MIDI backend, else they skip)
+  - `python -m pytest beatoven/output_module` (38 tests; 2 need `python-rtmidi` and a MIDI backend, else they skip)
   - `python scripts/check_spec_trace.py` (traceability; stands in for spec-lint, which is not on this machine)
   - `python -m beatoven.output_module replay-check <stream.json>`
 - Hardware is in the Kiln repo. No board exists. Every bench number there is a plan.
 
 ## Needs the operator
 
-0. Install KiCad 10 (`brew install --cask kicad` asks for your password). Schematic, ERC, DRC and Gerbers are blocked on it.
+The operator accepted every recommended answer on 2026-11-12. What was applied is in `docs/decisions/applied.md`. Still the operator's to do:
 
-1. Hardware lane authority: amend Spine 006/009 or issue a scoped grant. Until then nothing may drive a device.
-2. The other clarifications in `specs/001-output-module/spec.md`, "Open clarifications".
-3. Ratify `.specify/memory/constitution.md` (DRAFT 0.1.0).
+1. Amend Spine 006 and 009 in Notion and issue the first Hardware Lane Grant (row A1). The agent does neither.
+2. Choose the product name (D3), then apply for a Raspberry Pi product ID (D1).
+3. Check PR #12 against `main` (A4).
 
 ## Next work, in order
 
-3. 001-T095: decide `beatoven/media_intel/tests/test_temporal.py::test_infer_era_unknown` (test and code disagree; the only failing test in the repo once `opencv-python-headless` is installed).
-4. 001-T096: play-on-arrival mode.
-5. Rule on the PROPOSED ADRs in `docs/adr/` (0002 to 0004).
+1. Implement the accepted ADRs: `beatoven.pack.v1` (0002), ResonanceFrame determinism (0003).
+2. Write ADRs for `CLOCK IN` and for calibration commands on the Ops lane.
+3. 001-T096: play-on-arrival mode (issue #23).
+4. Raise the default look-ahead to 100 ms (issue #24).
 
 ## Known issues in the reference device (found while porting to firmware; see Kiln `docs/firmware-architecture.md` §10)
 
 - `sim.py`: timeouts are checked after due events play; `queue_capacity` counts internal entries; fail-closed records the nominal Safe Value, not the quantized one; `ENUMERATING` has no device-side timeout.
-- The "≤ 2 ms p99 latency" target conflicts with scheduled playout (events are sent 20–70 ms early). It should probably be restated as playout error. Operator call.
 - On a one-way link, a host keepalive re-syncs a device that has failed closed. Nothing replays, but the host cannot tell it happened.
 - `CLOCK IN` and calibration have no message in the contract yet.
 

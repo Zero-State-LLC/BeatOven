@@ -1,7 +1,8 @@
 # BeatOven Constitution
 
-**Version:** 0.1.0 (DRAFT, awaiting operator ratification)
+**Version:** 1.0.0
 **Drafted:** 2026-11-11
+**Ratified:** 2026-11-12 by the operator (decision A2)
 **Authority:** engineering constitution for this repo and the Output Module hardware repo
 
 ## Purpose
@@ -16,7 +17,7 @@ BeatOven compiles Abraxas Oracle output into music: MIDI, sound-design intent, a
 4. **Fail closed at trust boundaries.** A malformed packet, unknown version, missing grant, late event or lost clock MUST become an explicit error or safe state. It is never an implicit pass and never a best-effort guess.
 5. **Unknown remains unknown.** A missing unit, range or meaning MUST NOT be invented. The caller states it, or the result is marked `NOT_COMPUTABLE`.
 6. **Every value has a unit.** A contract that crosses to hardware carries time, voltage and width in named units. Unitless numbers stop at an adapter.
-7. **Hardware lane authority.** `hardware_control_allowed` is false by default, as canon states. A device may be driven only under a named, scoped, operator-issued grant. Simulation needs no grant. *Pending: `[NEEDS CLARIFICATION: operator decision on hardware lane authority]`. Until it is resolved, this principle is the binding rule.*
+7. **Hardware lane authority.** `hardware_control_allowed` is false by default, as canon states. A device may be driven only under a named, scoped, operator-issued grant. Simulation needs no grant. Decided 2026-11-12 (decision A1): hardware control is allowed by Hardware Lane Grant only. Amending canon to say so is the operator's act.
 8. **Public shapes change by proposal.** Existing public names and schemas change only through a written proposal with a migration and a version bump.
 9. **Provenance is mandatory.** A claim of "done", "passing" or "measured" needs the output that shows it. A plan is labelled a plan.
 

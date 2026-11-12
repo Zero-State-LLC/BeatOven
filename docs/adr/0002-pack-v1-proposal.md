@@ -1,6 +1,6 @@
 # 2. BeatOven Pack v1 (proposal)
 
-Status: PROPOSED. Nothing in `beatoven.pack.v0` is changed by this document.
+Status: ACCEPTED by the operator on 2026-11-12, with two amendments: the time unit is bars (decision B1), and `cv.clock_hz` is dropped in favour of a clock derived from `tempo_bpm` at 24 pulses per quarter note by default (decisions B2, B3). `beatoven.pack.v1` is not implemented yet; `beatoven.pack.v0` is unchanged.
 
 ## Context
 
@@ -24,4 +24,4 @@ A new schema `beatoven.pack.v1`, emitted alongside v0 until consumers move:
 
 ## Open
 
-`[NEEDS CLARIFICATION: unit of Pack t and dur]` and `[NEEDS CLARIFICATION: is cv.clock_hz meant to track midi.tempo_bpm]` must be answered first.
+Both questions are answered (see Status). Until v1 exists, the Pack adapter applies the same two rules to v0.

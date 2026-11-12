@@ -37,6 +37,11 @@ def infer_era_from_heuristics(physical: Dict[str, float], semantic: Dict[str, ob
     sharp = float(physical.get("sharpness", 0.0))
     sat = float(physical.get("sat_mean", 0.0))
 
+    # Unknown remains unknown: with no usable signal, say so rather than guess
+    # an era from the absence of sharpness (issue #22, operator decision B12).
+    if sharp <= 1e-3 and sat <= 1e-3:
+        return {"unknown": 1.0}, 0.05
+
     # Film-ish look: lower sharpness + moderate saturation -> older vibe (very weak)
     p_1990s = max(0.0, (0.6 - sharp)) * 0.6
     p_2000s = max(0.0, (0.5 - sharp)) * 0.4

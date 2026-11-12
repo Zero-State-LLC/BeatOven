@@ -50,7 +50,6 @@ def test_infer_era_basic():
     assert 0.95 <= total <= 1.05
 
 
-@pytest.mark.xfail(strict=True, reason="Test and code disagree on zero-feature input; operator decision pending: https://github.com/Zero-State-LLC/BeatOven/issues/22")
 def test_infer_era_unknown():
     """Very low features should return 'unknown'."""
     physical = {"sharpness": 0.0, "sat_mean": 0.0}

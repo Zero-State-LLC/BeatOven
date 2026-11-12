@@ -1,15 +1,20 @@
 {
   "schema": "beatoven.output_stream.v1",
-  "stream_id": "sha256:453ea6bc2cf8461cc57a35b6aaea3bbd6dd44f717cfc68cc7c27300a47feab89",
+  "stream_id": "sha256:08592ce044c9a55020edcc006429d4720ede751373da3da400ca6ed516aa872a",
   "source": {
     "contract": "beatoven.pack.v0",
-    "hash": "c5b077ed2cbf512286120d4524e4d92a1de42bb2be8c46e34a5157959594f525",
+    "hash": "37ca42ec0bfbaa61973f1723edc2115159a193c4de1b2fa53d856d6ab43b59bd",
     "seed": 7
   },
   "clock_pulse_us": 5000,
-  "duration_us": 1823708,
+  "duration_us": 7504904,
   "notes": [
     "UNROUTED: pitch of role HARMONY (gate only on GATE:3)",
+    "UNROUTED: track role TEXTURE has no output",
+    "UNROUTED: cc lane TEXTURE_ENERGY (no MOD_CV left)",
+    "UNROUTED: track role FX has no output",
+    "UNROUTED: cc lane FX_ENERGY (no MOD_CV left)",
+    "NOT_COMPUTABLE: cv.clock_hz ignored; it is not derived from midi.tempo_bpm",
     "NOT_COMPUTABLE: CLOCK lane points have no defined meaning; clock comes from a rate"
   ],
   "events": [
@@ -83,7 +88,7 @@
       "t_us": 0,
       "ch": "CLOCK:0",
       "op": "CLOCK_PERIOD",
-      "value": 159744
+      "value": 19531
     },
     {
       "t_us": 0,
@@ -92,385 +97,385 @@
       "value": 5000
     },
     {
-      "t_us": 226964,
+      "t_us": 936500,
       "ch": "GATE:1",
       "op": "GATE_OFF",
       "value": 0
     },
     {
-      "t_us": 226964,
+      "t_us": 936500,
       "ch": "GATE:2",
       "op": "GATE_OFF",
       "value": 0
     },
     {
-      "t_us": 226964,
+      "t_us": 936500,
       "ch": "GATE:3",
       "op": "GATE_OFF",
       "value": 0
     },
     {
-      "t_us": 227964,
+      "t_us": 937500,
       "ch": "PITCH_CV:0",
       "op": "SET_UV",
       "value": 3166667
     },
     {
-      "t_us": 227964,
+      "t_us": 937500,
       "ch": "PITCH_CV:1",
       "op": "SET_UV",
       "value": 4166667
     },
     {
-      "t_us": 227964,
+      "t_us": 937500,
       "ch": "MOD_CV:4",
       "op": "SET_UV",
       "value": 4570000
     },
     {
-      "t_us": 227964,
+      "t_us": 937500,
       "ch": "GATE:0",
       "op": "PULSE",
       "value": 5000
     },
     {
-      "t_us": 227964,
+      "t_us": 937500,
       "ch": "GATE:1",
       "op": "GATE_ON",
       "value": 0
     },
     {
-      "t_us": 227964,
+      "t_us": 937500,
       "ch": "GATE:2",
       "op": "GATE_ON",
       "value": 0
     },
     {
-      "t_us": 227964,
+      "t_us": 937500,
       "ch": "GATE:3",
       "op": "GATE_ON",
       "value": 0
     },
     {
-      "t_us": 454927,
+      "t_us": 1874000,
       "ch": "GATE:1",
       "op": "GATE_OFF",
       "value": 0
     },
     {
-      "t_us": 454927,
+      "t_us": 1874000,
       "ch": "GATE:2",
       "op": "GATE_OFF",
       "value": 0
     },
     {
-      "t_us": 454927,
+      "t_us": 1874000,
       "ch": "GATE:3",
       "op": "GATE_OFF",
       "value": 0
     },
     {
-      "t_us": 455927,
+      "t_us": 1875000,
       "ch": "PITCH_CV:0",
       "op": "SET_UV",
       "value": 3333333
     },
     {
-      "t_us": 455927,
+      "t_us": 1875000,
       "ch": "PITCH_CV:1",
       "op": "SET_UV",
       "value": 4333333
     },
     {
-      "t_us": 455927,
+      "t_us": 1875000,
       "ch": "MOD_CV:4",
       "op": "SET_UV",
       "value": 185000
     },
     {
-      "t_us": 455927,
+      "t_us": 1875000,
       "ch": "GATE:0",
       "op": "PULSE",
       "value": 5000
     },
     {
-      "t_us": 455927,
+      "t_us": 1875000,
       "ch": "GATE:1",
       "op": "GATE_ON",
       "value": 0
     },
     {
-      "t_us": 455927,
+      "t_us": 1875000,
       "ch": "GATE:2",
       "op": "GATE_ON",
       "value": 0
     },
     {
-      "t_us": 455927,
+      "t_us": 1875000,
       "ch": "GATE:3",
       "op": "GATE_ON",
       "value": 0
     },
     {
-      "t_us": 682891,
+      "t_us": 2811500,
       "ch": "GATE:1",
       "op": "GATE_OFF",
       "value": 0
     },
     {
-      "t_us": 682891,
+      "t_us": 2811500,
       "ch": "GATE:2",
       "op": "GATE_OFF",
       "value": 0
     },
     {
-      "t_us": 682891,
+      "t_us": 2811500,
       "ch": "GATE:3",
       "op": "GATE_OFF",
       "value": 0
     },
     {
-      "t_us": 683891,
+      "t_us": 2812500,
       "ch": "PITCH_CV:0",
       "op": "SET_UV",
       "value": 3416667
     },
     {
-      "t_us": 683891,
+      "t_us": 2812500,
       "ch": "PITCH_CV:1",
       "op": "SET_UV",
       "value": 4416667
     },
     {
-      "t_us": 683891,
+      "t_us": 2812500,
       "ch": "MOD_CV:4",
       "op": "SET_UV",
       "value": 20000
     },
     {
-      "t_us": 683891,
+      "t_us": 2812500,
       "ch": "GATE:0",
       "op": "PULSE",
       "value": 5000
     },
     {
-      "t_us": 683891,
+      "t_us": 2812500,
       "ch": "GATE:1",
       "op": "GATE_ON",
       "value": 0
     },
     {
-      "t_us": 683891,
+      "t_us": 2812500,
       "ch": "GATE:2",
       "op": "GATE_ON",
       "value": 0
     },
     {
-      "t_us": 683891,
+      "t_us": 2812500,
       "ch": "GATE:3",
       "op": "GATE_ON",
       "value": 0
     },
     {
-      "t_us": 910854,
+      "t_us": 3749000,
       "ch": "GATE:1",
       "op": "GATE_OFF",
       "value": 0
     },
     {
-      "t_us": 910854,
+      "t_us": 3749000,
       "ch": "GATE:2",
       "op": "GATE_OFF",
       "value": 0
     },
     {
-      "t_us": 910854,
+      "t_us": 3749000,
       "ch": "GATE:3",
       "op": "GATE_OFF",
       "value": 0
     },
     {
-      "t_us": 911854,
+      "t_us": 3750000,
       "ch": "PITCH_CV:0",
       "op": "SET_UV",
       "value": 3583333
     },
     {
-      "t_us": 911854,
+      "t_us": 3750000,
       "ch": "PITCH_CV:1",
       "op": "SET_UV",
       "value": 4583333
     },
     {
-      "t_us": 911854,
+      "t_us": 3750000,
       "ch": "MOD_CV:0",
       "op": "SET_UV",
-      "value": 3858268
+      "value": 3818898
     },
     {
-      "t_us": 911854,
+      "t_us": 3750000,
       "ch": "MOD_CV:1",
       "op": "SET_UV",
-      "value": 3858268
+      "value": 3818898
     },
     {
-      "t_us": 911854,
+      "t_us": 3750000,
       "ch": "MOD_CV:2",
       "op": "SET_UV",
-      "value": 3858268
+      "value": 3818898
     },
     {
-      "t_us": 911854,
+      "t_us": 3750000,
       "ch": "MOD_CV:3",
       "op": "SET_UV",
-      "value": 3858268
+      "value": 3818898
     },
     {
-      "t_us": 911854,
+      "t_us": 3750000,
       "ch": "MOD_CV:4",
       "op": "SET_UV",
       "value": 4965000
     },
     {
-      "t_us": 911854,
+      "t_us": 3750000,
       "ch": "GATE:0",
       "op": "PULSE",
       "value": 5000
     },
     {
-      "t_us": 911854,
+      "t_us": 3750000,
       "ch": "GATE:1",
       "op": "GATE_ON",
       "value": 0
     },
     {
-      "t_us": 911854,
+      "t_us": 3750000,
       "ch": "GATE:2",
       "op": "GATE_ON",
       "value": 0
     },
     {
-      "t_us": 911854,
+      "t_us": 3750000,
       "ch": "GATE:3",
       "op": "GATE_ON",
       "value": 0
     },
     {
-      "t_us": 1138818,
+      "t_us": 4686500,
       "ch": "GATE:1",
       "op": "GATE_OFF",
       "value": 0
     },
     {
-      "t_us": 1138818,
+      "t_us": 4686500,
       "ch": "GATE:2",
       "op": "GATE_OFF",
       "value": 0
     },
     {
-      "t_us": 1138818,
+      "t_us": 4686500,
       "ch": "GATE:3",
       "op": "GATE_OFF",
       "value": 0
     },
     {
-      "t_us": 1139818,
+      "t_us": 4687500,
       "ch": "PITCH_CV:0",
       "op": "SET_UV",
       "value": 3750000
     },
     {
-      "t_us": 1139818,
+      "t_us": 4687500,
       "ch": "PITCH_CV:1",
       "op": "SET_UV",
       "value": 4750000
     },
     {
-      "t_us": 1139818,
+      "t_us": 4687500,
       "ch": "MOD_CV:4",
       "op": "SET_UV",
       "value": 1595000
     },
     {
-      "t_us": 1139818,
+      "t_us": 4687500,
       "ch": "GATE:0",
       "op": "PULSE",
       "value": 5000
     },
     {
-      "t_us": 1139818,
+      "t_us": 4687500,
       "ch": "GATE:1",
       "op": "GATE_ON",
       "value": 0
     },
     {
-      "t_us": 1139818,
+      "t_us": 4687500,
       "ch": "GATE:2",
       "op": "GATE_ON",
       "value": 0
     },
     {
-      "t_us": 1139818,
+      "t_us": 4687500,
       "ch": "GATE:3",
       "op": "GATE_ON",
       "value": 0
     },
     {
-      "t_us": 1367781,
+      "t_us": 5625000,
       "ch": "MOD_CV:4",
       "op": "SET_UV",
       "value": 985000
     },
     {
-      "t_us": 1481763,
+      "t_us": 6093750,
       "ch": "GATE:1",
       "op": "GATE_OFF",
       "value": 0
     },
     {
-      "t_us": 1481763,
+      "t_us": 6093750,
       "ch": "GATE:2",
       "op": "GATE_OFF",
       "value": 0
     },
     {
-      "t_us": 1481763,
+      "t_us": 6093750,
       "ch": "GATE:3",
       "op": "GATE_OFF",
       "value": 0
     },
     {
-      "t_us": 1595745,
+      "t_us": 6562500,
       "ch": "MOD_CV:4",
       "op": "SET_UV",
       "value": 2495000
     },
     {
-      "t_us": 1823708,
+      "t_us": 7500000,
       "ch": "MOD_CV:0",
       "op": "SET_UV",
       "value": 2519685
     },
     {
-      "t_us": 1823708,
+      "t_us": 7500000,
       "ch": "MOD_CV:1",
       "op": "SET_UV",
       "value": 2519685
     },
     {
-      "t_us": 1823708,
+      "t_us": 7500000,
       "ch": "MOD_CV:2",
       "op": "SET_UV",
       "value": 2519685
     },
     {
-      "t_us": 1823708,
+      "t_us": 7500000,
       "ch": "MOD_CV:3",
       "op": "SET_UV",
       "value": 2519685
     },
     {
-      "t_us": 1823708,
+      "t_us": 7504904,
       "ch": "CLOCK:0",
       "op": "CLOCK_PERIOD",
       "value": 0

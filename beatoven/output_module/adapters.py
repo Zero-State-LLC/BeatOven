@@ -87,6 +87,20 @@ def _clock_period_us(bpm: Any, ppqn: int) -> int:
     return _round(Decimal(60_000_000) / (_dec(bpm) * ppqn))
 
 
+_CLOCK_PULSE_US = 5_000  # the OutputStream default clock pulse width
+
+
+def _clock_stop_us(stop: int, period: int, since: int = 0) -> int:
+    """Earliest time >= ``stop`` at which the clock's last pulse has ended.
+
+    A clock that started at ``since`` ticks every ``period``. Stopping inside a
+    pulse would leave the stream ending with the clock jack still high.
+    """
+    stop = max(stop, since + period)
+    last_tick = since + (stop - since) // period * period
+    return max(stop, last_tick + min(_CLOCK_PULSE_US, period // 2))
+
+
 def _notes_to_events(
     notes: Sequence[Tuple[int, int, int]],  # (t_on_us, t_off_us, midi note), any order
     pitch: Optional[Channel], gate: Channel, as_trigger: bool,
@@ -122,17 +136,20 @@ def _dedupe(events: Iterable[OutputEvent]) -> List[OutputEvent]:
 def from_pack(
     pack: Mapping[str, Any],
     *,
-    time_unit: str,
+    time_unit: str = "bars",
     zero_volt_note: int = 12,
-    clock_ppqn: Optional[int] = None,
+    clock_ppqn: Optional[int] = 24,
     trigger_us: int = 5_000,
     reset_at_start: bool = True,
     role_routing: Mapping[str, Tuple[Optional[Channel], Channel, bool]] = DEFAULT_ROLE_ROUTING,
 ) -> OutputStream:
     """BeatOven Pack v0 -> Output Stream.
 
-    ``time_unit`` is required because the Pack schema does not say what unit
-    its ``t`` and ``dur`` fields use.
+    The Pack's ``t`` and ``dur`` are in bars (operator decision B1,
+    2026-11-12); ``time_unit`` stays as an override. The clock is derived from
+    ``midi.tempo_bpm`` at ``clock_ppqn`` pulses per quarter note, 24 by default
+    (decisions B2, B3). ``cv.clock_hz`` is never used. Pass ``clock_ppqn=None``
+    for no clock.
     """
     midi = pack["midi"]
     bpm = midi["tempo_bpm"]
@@ -170,7 +187,7 @@ def from_pack(
         if cv.get("clock_hz") is not None:
             notes.append("NOT_COMPUTABLE: cv.clock_hz ignored; it is not derived from midi.tempo_bpm")
     elif cv.get("clock_hz") is not None:
-        period = _round(Decimal(1_000_000) / _dec(cv["clock_hz"]))
+        notes.append("NOT_COMPUTABLE: cv.clock_hz ignored and no clock_ppqn given; no clock is emitted")
     for lane in cv.get("lanes", []):
         kind = lane["lane_type"]
         if kind == "MOD_CV":
@@ -187,7 +204,7 @@ def from_pack(
         events.append(OutputEvent(0, RESET0, Op.PULSE, trigger_us))
     if period is not None:
         events.append(OutputEvent(0, CLOCK0, Op.CLOCK_PERIOD, period))
-        events.append(OutputEvent(max(end, period), CLOCK0, Op.CLOCK_PERIOD, 0))
+        events.append(OutputEvent(_clock_stop_us(end, period), CLOCK0, Op.CLOCK_PERIOD, 0))
     return OutputStream.build(
         events, source_contract="beatoven.pack.v0", source_hash=_sha(pack),
         seed=pack.get("seed"), notes=tuple(notes),
@@ -204,16 +221,17 @@ def from_resonance_frame(
     frame: Any,
     *,
     bars: int,
-    step_threshold: float,
-    clock_ppqn: int = 4,
+    step_threshold: Optional[float] = None,
+    clock_ppqn: int = 24,
     trigger_us: int = 5_000,
     macro_routing: Mapping[str, int] = DEFAULT_MACRO_ROUTING,
 ) -> OutputStream:
     """ResonanceFrame -> Output Stream.
 
-    ``step_threshold`` is required: RhythmTokens document step values as
-    "probability/velocity" without choosing one, so the caller decides which
-    steps fire. A step fires when its value is >= the threshold.
+    A RhythmTokens step value is a velocity (operator decision B10,
+    2026-11-12): a step fires when its value is above 0. ``step_threshold``
+    stays as an override; when given, a step fires when its value is >= it.
+    Swing is not applied.
     """
     events: List[OutputEvent] = []
     notes: List[str] = []
@@ -236,11 +254,13 @@ def from_resonance_frame(
                 continue
             for bar in range(bars):
                 for step, v in enumerate(grid):
-                    if _dec(v) >= _dec(step_threshold):
+                    fires = _dec(v) > 0 if step_threshold is None else _dec(v) >= _dec(step_threshold)
+                    if fires:
                         t = _round(bar_us * bar + bar_us * step / len(grid))
                         events.append(OutputEvent(t, _gate(gate_i), Op.PULSE, trigger_us))
-        events.append(OutputEvent(0, CLOCK0, Op.CLOCK_PERIOD, _clock_period_us(rhythm.bpm, clock_ppqn)))
-        events.append(OutputEvent(_round(bar_us * bars), CLOCK0, Op.CLOCK_PERIOD, 0))
+        period = _clock_period_us(rhythm.bpm, clock_ppqn)
+        events.append(OutputEvent(0, CLOCK0, Op.CLOCK_PERIOD, period))
+        events.append(OutputEvent(_clock_stop_us(_round(bar_us * bars), period), CLOCK0, Op.CLOCK_PERIOD, 0))
         if metrics is not None:
             notes.append("NOT_COMPUTABLE: swing is not applied; its timing meaning is undefined")
     source = {"id": getattr(frame, "id", None), "provenance_hash": getattr(frame, "provenance_hash", None)}
@@ -257,7 +277,7 @@ def _get(obj: Any, key: str) -> Any:
     return obj[key] if isinstance(obj, Mapping) else getattr(obj, key)
 
 
-def from_audio_control_frames(frames: Sequence[Any], *, window_us: int, clock_ppqn: int = 4) -> OutputStream:
+def from_audio_control_frames(frames: Sequence[Any], *, window_us: int, clock_ppqn: int = 24) -> OutputStream:
     """AudioControlFrame sequence -> Output Stream.
 
     ``window_us`` is required: ``window_utc`` identifies a window but the
@@ -267,16 +287,17 @@ def from_audio_control_frames(frames: Sequence[Any], *, window_us: int, clock_pp
         raise ContractError("window_us must be positive")
     events: List[OutputEvent] = []
     last_period: Optional[int] = None
+    last_change = 0
     for i, frame in enumerate(frames):
         t = i * window_us
         period = _clock_period_us(_get(frame, "tempo_bpm"), clock_ppqn)
         if period != last_period:
             events.append(OutputEvent(t, CLOCK0, Op.CLOCK_PERIOD, period))
-            last_period = period
+            last_period, last_change = period, t
         for ch, name in enumerate(_ACF_FIELDS):
             events.append(OutputEvent(t, _mod(ch), Op.SET_UV, unit_to_uv(_get(frame, name))))
     if frames:
-        events.append(OutputEvent(len(frames) * window_us, CLOCK0, Op.CLOCK_PERIOD, 0))
+        events.append(OutputEvent(_clock_stop_us(len(frames) * window_us, last_period, last_change), CLOCK0, Op.CLOCK_PERIOD, 0))
     digest = _sha([{k: _get(f, k) for k in ("window_utc", "tempo_bpm") + _ACF_FIELDS} for f in frames])
     return OutputStream.build(events, source_contract="AudioControlFrame", source_hash=digest)
 
