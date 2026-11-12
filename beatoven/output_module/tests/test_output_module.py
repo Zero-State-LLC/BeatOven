@@ -353,3 +353,40 @@ def test_at022_dac_quantization_is_integer_and_within_half_an_lsb():
         uv = note_to_uv(note, 12)
         code, out = spec.quantize(uv)
         assert 0 <= code <= 65535 and abs(out - uv) <= lsb / 2 + 1
+
+
+# ---- device-side checks (FR-003, FR-014): the device does not trust the host ---------
+
+def _streaming_device():
+    import struct
+    device = SimulatedOutputModule()
+    device.feed(Frame(Msg.HELLO, 0, b"").encode(), 0)
+    device.feed(Frame(Msg.SYNC, 1, struct.pack(">Q", 0)).encode(), 0)
+    return device, struct
+
+
+def test_at023_malformed_bodies_are_refused_not_raised():
+    device, struct = _streaming_device()
+    device.feed(Frame(Msg.STREAM_BEGIN, 2, b"short").encode(), 0)
+    device.feed(Frame(Msg.OPS, 3, b"\xff\xff").encode(), 0)
+    device.feed(Frame(Msg.OPS, 4, b"\x01").encode(), 0)
+    assert device.lifecycle.state is State.SYNCED and device.trace == []
+    device.feed(Frame(Msg.STREAM_BEGIN, 5, struct.pack(">32sIQI", b"x" * 32, 1, 50_000, 0)).encode(), 0)
+    assert device.lifecycle.state is State.SYNCED  # zero-width clock pulse refused
+
+
+@pytest.mark.parametrize("event,count", [
+    (OutputEvent(0, Channel(ChannelKind.GATE, 0), Op.SET_UV, 1), 1),          # op not allowed on the kind
+    (OutputEvent(0, Channel(ChannelKind.PITCH_CV, 9), Op.SET_UV, 1), 1),      # channel the device lacks
+    (OutputEvent(0, Channel(ChannelKind.PITCH_CV, 0), Op.SET_UV, -5), 1),     # below the channel range
+    (OutputEvent(0, Channel(ChannelKind.GATE, 0), Op.GATE_ON), 0),            # more events than announced
+])
+def test_at024_device_fails_closed_on_events_it_cannot_play(event, count):
+    from beatoven.output_module.wire import events_body
+    device, struct = _streaming_device()
+    device.feed(Frame(Msg.STREAM_BEGIN, 2, struct.pack(">32sIQI", b"x" * 32, max(count, 1) if count else 1, 50_000, 5_000)).encode(), 0)
+    events = [event] if count else [event, OutputEvent(1, Channel(ChannelKind.GATE, 0), Op.GATE_OFF)]
+    device.feed(Frame(Msg.EVENTS, 3, events_body(0, events)).encode(), 0)
+    assert device.lifecycle.state is State.TIMING_LOST and device.loss_reason is LossReason.INTEGRITY
+    device.advance(1_000_000)
+    assert device.lifecycle.state is State.SAFE_IDLE and not [e for e in device.trace if e[2] == "CV_UV"]

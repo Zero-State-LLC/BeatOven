@@ -28,7 +28,7 @@
 
 ## P2: Fail closed when timing is lost
 
-- [x] 001-T030 Loss detection (late, gap, integrity, keepalive, sync, overflow, abort) and fail-closed outputs: FR-014 (workflows: production-systems, anti-slop-code)
+- [x] 001-T030 Device-side event checks (FR-003) and loss detection (late, gap, integrity, keepalive, sync, overflow, abort) and fail-closed outputs: FR-014 (workflows: production-systems, anti-slop-code)
 - [x] 001-T031 No resume without resync: FR-015 (workflows: production-systems)
 - [x] 001-T032 [P] Hardware Lane Grant, deny by default: FR-017 (workflows: production-systems, anti-slop-code)
 
@@ -43,10 +43,10 @@
 
 ## P1-HW: The physical Output Module (hardware repo)
 
-- [ ] 001-T050 Firmware core in C passing the golden vectors: FR-013, FR-014, FR-016, FR-025 (workflows: anti-slop-code, production-systems)
-- [ ] 001-T051 Schematic and layout; ERC and DRC at 0 errors: FR-019, FR-020, FR-021, FR-024 (workflows: production-systems)
-- [ ] 001-T052 Costed BOM with two sources per active part: FR-020, FR-021 (workflows: production-systems, google-developer-style)
-- [ ] 001-T053 Panel drawing with jack and LED coordinates: FR-019 (workflows: google-developer-style)
+- [x] 001-T050 Firmware core in C passing the golden vectors (Kiln `make -C firmware/core test`: 561 checks, trace byte-identical): FR-013, FR-014, FR-016, FR-025 (workflows: anti-slop-code, production-systems)
+- [ ] 001-T051 Schematic and layout; ERC and DRC at 0 errors. BLOCKED: KiCad install needs an administrator password: FR-019, FR-020, FR-021, FR-024 (workflows: production-systems)
+- [ ] 001-T052 Costed BOM with two sources per active part. PARTIAL: 11 of 32 lines priced: FR-020, FR-021 (workflows: production-systems, google-developer-style)
+- [x] 001-T053 Panel drawing with jack and LED coordinates: FR-019 (workflows: google-developer-style)
 - [ ] 001-T054 Build boards; run HT-1, HT-2, HT-3, HT-5: FR-020, FR-021, FR-023, FR-024 (workflows: production-systems)
 - [ ] 001-T055 Run HT-4 and HT-6 on hardware: FR-022, FR-025 (workflows: production-systems)
 - [ ] 001-T056 Real MIDI port transport in the host driver, behind the grant: FR-017, FR-022 (workflows: anti-slop-code, production-systems)

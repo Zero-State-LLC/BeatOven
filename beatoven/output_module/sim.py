@@ -16,7 +16,10 @@ from typing import Dict, List, Optional, Tuple
 
 import cbor2
 
-from .contract import Channel, ChannelKind, ContractError, Descriptor, Op, OutputEvent, SafePolicy, reference_descriptor
+from .contract import (
+    MAX_PULSE_US, MIN_PULSE_US, Channel, ChannelKind, ContractError, Descriptor, Op, OutputEvent,
+    OutputStream, SafePolicy, reference_descriptor,
+)
 from .lifecycle import Event, Lifecycle, LossReason, State
 from .wire import Frame, Msg, WireError, parse_events_body, split_frames
 
@@ -124,8 +127,12 @@ class SimulatedOutputModule:
                 self.loss_reason = None
                 self.lifecycle.fire(Event.RESYNC)
         elif f.type is Msg.STREAM_BEGIN:
+            if len(f.body) != 48:
+                self._ack(f, False)
+                return
             stream_id, count, start, pulse = struct.unpack(">32sIQI", f.body)
-            ok = st is State.SYNCED and start >= self._now + self.descriptor.min_lead_us
+            ok = (st is State.SYNCED and start >= self._now + self.descriptor.min_lead_us
+                  and MIN_PULSE_US <= pulse <= MAX_PULSE_US)
             if ok:
                 self._stream_id, self._expected, self._start, self._clock_pulse_us = stream_id, count, start, pulse
                 self._received = self._played = 0
@@ -146,6 +153,9 @@ class SimulatedOutputModule:
             if first != self._received:
                 self._lose(LossReason.SEQUENCE_GAP)
                 return
+            if self._received + len(events) > self._expected or not self._playable(events):
+                self._lose(LossReason.INTEGRITY)
+                return
             if len(self._heap) + len(events) > self.descriptor.queue_capacity:
                 self._lose(LossReason.QUEUE_OVERFLOW)
                 return
@@ -161,9 +171,24 @@ class SimulatedOutputModule:
             if st is State.STREAMING:
                 self._lose(LossReason.HOST_ABORT)
         elif f.type is Msg.OPS:
-            msg = cbor2.loads(f.body)
+            try:
+                msg = cbor2.loads(f.body)
+            except Exception:  # any undecodable body is refused, never raised
+                msg = None
+            if not isinstance(msg, dict):
+                self._send(Msg.OPS_ACK, cbor2.dumps({"ack": None, "ok": False}))
+                return
             self.ops_log.append(msg)
             self._send(Msg.OPS_ACK, cbor2.dumps({"ack": msg.get("nonce"), "ok": msg.get("kind") == "PING"}))
+
+    def _playable(self, events) -> bool:
+        """The device checks every event itself; it does not trust the host's check."""
+        try:
+            self.descriptor.check_stream(
+                OutputStream(events=tuple(events), source_contract="wire", source_hash=""))
+        except ContractError:
+            return False
+        return True
 
     # ---- scheduler and outputs ---------------------------------------------
     def _push(self, t: int, prio: int, action) -> None:

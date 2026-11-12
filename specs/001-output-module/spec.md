@@ -105,7 +105,7 @@ Acceptance criteria:
 |---|---|---|
 | FR-001 | The Output Stream MUST carry time in microseconds, voltage in microvolts at the jack, and widths in microseconds. No value is unitless. | AT-002, AT-005 |
 | FR-002 | An Output Stream MUST be content-addressed: identical inputs give identical bytes and identifier; an altered stream is refused. | AT-001, AT-003 |
-| FR-003 | An Output Event that is out of range, or not supported by its Output Channel, MUST be refused. Pulses MUST be ≥ 1 ms. | AT-004 |
+| FR-003 | An Output Event that is out of range, or not supported by its Output Channel, MUST be refused. Pulses MUST be ≥ 1 ms. The Output Module MUST make this check itself and treat a failure as Timing Loss; a malformed message MUST be refused without effect. | AT-004, AT-023, AT-024 |
 | FR-004 | An Output Module MUST state its Output Channels and their ranges in a Descriptor. A stream outside the Descriptor MUST be refused before sending. | AT-020, AT-022 |
 | FR-005 | The Pack adapter MUST require a stated time unit, MUST resolve overlapping notes by a fixed rule, and MUST list every input it cannot map. | AT-006, AT-011 |
 | FR-006 | No adapter may modify its source or change an existing public shape. | AT-007 |
