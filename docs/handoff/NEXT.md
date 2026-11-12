@@ -1,6 +1,6 @@
 # Next
 
-Updated 2026-11-12. `main` is at PR #30: operator decisions applied, Pack v1 and `ResonanceFrame.from_source` implemented.
+Updated 2026-11-12. `main` is at PR #34: operator decisions applied, Pack v1 and `ResonanceFrame.from_source` implemented, default look-ahead 100 ms.
 
 ## State
 
@@ -12,7 +12,7 @@ Updated 2026-11-12. `main` is at PR #30: operator decisions applied, Pack v1 and
   - `python scripts/check_spec_trace.py` (traceability; stands in for spec-lint, which is not on this machine)
   - `python -m beatoven.output_module replay-check <stream.json>`
 - Hardware is in the Kiln repo. No board exists. Every bench number there is a plan.
-- Kiln state on 2026-11-12: the firmware core reproduces the current golden vectors (963 checks) on branch `fw/revendor-contract`, not yet merged. The board is being re-placed on `hw/kicad-rev-a` for the LED, USB-C and header decisions; it is not manufacturable until its DRC shows 0 errors and 0 unrouted connections.
+- Kiln state on 2026-11-12, branch `hw/kicad-rev-a` at `8a8cc7e` (nothing is on Kiln `main` yet): the firmware core reproduces the current golden vectors, 1146 checks. The board is re-placed for the LED, USB-C and header decisions: ERC 0 errors, 0 DRC rule errors, 0 courtyard overlaps, **22 unrouted connections in 17 nets**, so it is not manufacturable. Routing work continues there; see Kiln `hardware/kicad/STATUS.md`.
 
 ## Needs the operator
 
