@@ -1,6 +1,6 @@
 # 2. BeatOven Pack v1 (proposal)
 
-Status: ACCEPTED by the operator on 2026-11-12, with two amendments: the time unit is bars (decision B1), and `cv.clock_hz` is dropped in favour of a clock derived from `tempo_bpm` at 24 pulses per quarter note by default (decisions B2, B3). `beatoven.pack.v1` is not implemented yet; `beatoven.pack.v0` is unchanged.
+Status: ACCEPTED by the operator on 2026-11-12, with two amendments: the time unit is bars (decision B1), and `cv.clock_hz` is dropped in favour of a clock derived from `tempo_bpm` at 24 pulses per quarter note by default (decisions B2, B3). Implemented on 2026-11-12: `render_pack(..., schema_version="v1")` and `beatoven/schemas/beatoven.pack.v1.schema.json`. `beatoven.pack.v0` is unchanged and remains the default.
 
 ## Context
 

@@ -133,12 +133,15 @@ def _dedupe(events: Iterable[OutputEvent]) -> List[OutputEvent]:
     return out
 
 
+_FROM_PACK = object()  # "use what the Pack says, else the default"
+
+
 def from_pack(
     pack: Mapping[str, Any],
     *,
-    time_unit: str = "bars",
+    time_unit: Optional[str] = None,
     zero_volt_note: int = 12,
-    clock_ppqn: Optional[int] = 24,
+    clock_ppqn: Any = _FROM_PACK,
     trigger_us: int = 5_000,
     reset_at_start: bool = True,
     role_routing: Mapping[str, Tuple[Optional[Channel], Channel, bool]] = DEFAULT_ROLE_ROUTING,
@@ -150,8 +153,16 @@ def from_pack(
     ``midi.tempo_bpm`` at ``clock_ppqn`` pulses per quarter note, 24 by default
     (decisions B2, B3). ``cv.clock_hz`` is never used. Pass ``clock_ppqn=None``
     for no clock.
+
+    A ``beatoven.pack.v1`` Pack states both itself (``midi.time_unit``,
+    ``midi.clock_ppqn``); those are used unless the caller overrides them.
     """
     midi = pack["midi"]
+    is_v1 = (pack.get("meta") or {}).get("schema") == "beatoven.pack.v1"
+    if time_unit is None:
+        time_unit = midi["time_unit"] if is_v1 else "bars"
+    if clock_ppqn is _FROM_PACK:
+        clock_ppqn = midi["clock_ppqn"] if is_v1 else 24
     bpm = midi["tempo_bpm"]
     sig = midi["time_signature"]
     beats_per_bar = Decimal(sig["num"]) * Decimal(4) / Decimal(sig["den"])
@@ -206,7 +217,9 @@ def from_pack(
         events.append(OutputEvent(0, CLOCK0, Op.CLOCK_PERIOD, period))
         events.append(OutputEvent(_clock_stop_us(end, period), CLOCK0, Op.CLOCK_PERIOD, 0))
     return OutputStream.build(
-        events, source_contract="beatoven.pack.v0", source_hash=_sha(pack),
+        events, source_contract="beatoven.pack.v1" if is_v1 else "beatoven.pack.v0",
+        # A v1 Pack embeds its own Output Stream, so that part is left out of the hash.
+        source_hash=_sha({k: v for k, v in pack.items() if k not in ("output_stream", "provenance")} if is_v1 else pack),
         seed=pack.get("seed"), notes=tuple(notes),
     )
 

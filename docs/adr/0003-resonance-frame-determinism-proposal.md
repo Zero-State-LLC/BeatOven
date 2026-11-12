@@ -1,6 +1,6 @@
 # 3. Deterministic ResonanceFrame identity (proposal)
 
-Status: ACCEPTED by the operator on 2026-11-12 (decisions A3, B10). Not implemented yet; `ResonanceFrame` is unchanged.
+Status: ACCEPTED by the operator on 2026-11-12 (decisions A3, B10). Implemented on 2026-11-12: `ResonanceFrame.from_source` added; `new` is unchanged and documented as non-deterministic; a step value is a velocity that fires above 0; swing is not applied to what reaches hardware.
 
 ## Context
 

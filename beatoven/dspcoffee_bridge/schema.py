@@ -45,7 +45,8 @@ class ResonanceMetrics:
 class RhythmTokens:
     bpm: float
     meter: Tuple[int, int] = (4, 4)
-    # Step grids: each token list is length N steps, values in [0,1] probability/velocity
+    # Step grids: each token list is length N steps. A step value is a velocity
+    # in [0, 1]; a step fires when its value is above 0 (ADR 0003).
     kick: Optional[List[float]] = None
     snare: Optional[List[float]] = None
     hat: Optional[List[float]] = None
@@ -96,7 +97,17 @@ class ResonanceFrame:
         return ResonanceFrame(**{**self.__dict__, "provenance_hash": ph})
 
     @staticmethod
+    def from_source(source: SourceKind, *, id: str, ts_ms: int, **kwargs: Any) -> "ResonanceFrame":
+        """Deterministic constructor (ADR 0003): the caller states ``id`` and ``ts_ms``.
+
+        The same arguments always give the same frame and provenance hash.
+        """
+        return ResonanceFrame(id=id, ts_ms=ts_ms, source=source, **kwargs).with_provenance_hash()
+
+    @staticmethod
     def new(source: SourceKind, **kwargs: Any) -> "ResonanceFrame":
+        """NOT deterministic when ``id`` or ``ts_ms`` is omitted: both then come
+        from the wall clock. Use ``from_source`` where SEED determinism matters."""
         base = {
             "id": kwargs.pop("id", _stable_hash({"t": _now_ms(), "r": time.perf_counter_ns()})),
             "ts_ms": kwargs.pop("ts_ms", _now_ms()),
