@@ -9,6 +9,7 @@ Schema identifiers such as `beatoven.pack.v0` and `beatoven.output_stream.v1` ar
 ### Added
 
 - Decision brief with a recommended answer for every open operator decision (`docs/decisions/`).
+- Research pass over the remaining open questions, with each answer checked against its primary source (`docs/decisions/research/open-questions.md`).
 
 ### Changed
 

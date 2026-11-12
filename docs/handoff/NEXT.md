@@ -17,6 +17,8 @@ Updated 2026-11-11, branch `feat/output-module-contract`.
 
 Every open decision has a recommended answer in `docs/decisions/2026-11-12-operator-decisions.md`. Reply with the row numbers you accept.
 
+A second research pass is in `docs/decisions/research/open-questions.md`. It closed 12 questions, lists the answers that were rejected, and names what is still open. It also corrected Kiln's power budget: 51.7 mA on +12 V and 20.5 mA on −12 V, calculated.
+
 0. Install KiCad 10 (`brew install --cask kicad` asks for your password). Schematic, ERC, DRC and Gerbers are blocked on it.
 
 1. Hardware lane authority: amend Spine 006/009 or issue a scoped grant. Until then nothing may drive a device.
