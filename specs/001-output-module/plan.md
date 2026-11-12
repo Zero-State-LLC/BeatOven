@@ -6,7 +6,7 @@ Status: software implemented on branch `feat/output-module-contract`; hardware i
 
 | Part | Choice | Reason |
 |---|---|---|
-| Host code | Python ≥ 3.9, standard library plus `cbor2` (already the `hardware` extra) | Same language as the rest of the repo. Integer and `Decimal` math only, so results do not vary by platform. |
+| Host code | Python ≥ 3.10, standard library plus `cbor2` (already the `hardware` extra) | Same language as the rest of the repo. Integer and `Decimal` math only, so results do not vary by platform. |
 | Host tests | pytest | Already the repo's runner. |
 | Host link, primary | USB-MIDI 1.0, class compliant, Output Stream in System Exclusive | [research/transport-tradeoffs.md](research/transport-tradeoffs.md) |
 | Host link, fallback | TRS MIDI in, Type A, same bytes | Same file. One-way. |

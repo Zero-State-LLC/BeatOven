@@ -8,14 +8,23 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
+    name: Output Module (Python ${{ matrix.python }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.11", "3.13"]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: ${{ matrix.python }}
       - run: pip install -e ".[dev,hardware]"
       - name: Acceptance tests
         run: python -m pytest -q beatoven/output_module
@@ -23,3 +32,14 @@ jobs:
         run: python scripts/check_spec_trace.py
       - name: SEED replay on the simulated device
         run: python -m beatoven.output_module replay-check beatoven/output_module/vectors/stream.json
+
+  full:
+    name: Full suite
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -e ".[dev,hardware]" opencv-python-headless
+      - run: python -m pytest -q
