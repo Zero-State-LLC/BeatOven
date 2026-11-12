@@ -1,0 +1,30 @@
+name: Bug report
+description: Something behaves differently from the spec or the docs
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: Include the command you ran and its output.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options: [Output Module, Pack renderer, Engine, Media intelligence, API, Docs, Other]
+    validations:
+      required: true
