@@ -4,6 +4,8 @@ Updated 2026-11-11, branch `feat/output-module-contract`.
 
 ## State
 
+- Board: https://github.com/orgs/Zero-State-LLC/projects/33 (BeatOven + Kiln; Todo, Blocked, In Progress, Done; P0 to P2).
+
 - Software for the Output Module is implemented and tested in simulation: `beatoven/output_module/`, spec in `specs/001-output-module/`.
 - Run the checks:
   - `python -m pytest beatoven/output_module` (36 tests; 2 need `python-rtmidi` and a MIDI backend, else they skip)

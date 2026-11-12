@@ -1,8 +1,8 @@
 name: Deploy to Azure Container Web App
 
+# Manual only. It ran on every push to main and failed at the Azure login step
+# (no credentials are configured). Restore the push trigger once they are.
 on:
-  push:
-    branches: ["main"]
   workflow_dispatch:
 
 env:

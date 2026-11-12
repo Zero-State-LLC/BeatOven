@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 360" role="img" aria-labelledby="t d">
+  <title id="t">BeatOven</title>
+  <desc id="d">An Oracle signal is compiled by BeatOven into a timed Output Stream that an Output Module plays as control voltages and gates.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#12100e"/><stop offset="1" stop-color="#231a12"/>
+    </linearGradient>
+    <linearGradient id="heat" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#f2b24a"/><stop offset="1" stop-color="#e2562b"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="360" fill="url(#bg)"/>
+  <g font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">
+    <text x="72" y="118" font-size="68" font-weight="700" fill="#f6efe6" letter-spacing="-1">BeatOven</text>
+    <text x="74" y="160" font-size="23" fill="#c9b8a3">The Oracle-to-music compiler. Same seed, same voltages, every run.</text>
+  </g>
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="15" fill="#c9b8a3">
+    <!-- oracle signal: irregular -->
+    <path d="M72 262 C 96 222, 112 300, 136 258 S 170 214, 190 266 S 226 300, 248 246 S 282 232, 300 262" fill="none" stroke="#8d7f70" stroke-width="2.5" stroke-linecap="round"/>
+    <text x="72" y="322">Oracle signal</text>
+    <path d="M318 262 H 392" stroke="#5d5247" stroke-width="2"/><path d="M392 262 l-9 -6 v12 z" fill="#5d5247"/>
+    <!-- compiler -->
+    <rect x="408" y="222" width="150" height="80" rx="10" fill="#1b1612" stroke="url(#heat)" stroke-width="2.5"/>
+    <text x="483" y="268" text-anchor="middle" fill="#f6efe6" font-size="17">compile</text>
+    <text x="408" y="322">BeatOven + seed</text>
+    <path d="M576 262 H 650" stroke="#5d5247" stroke-width="2"/><path d="M650 262 l-9 -6 v12 z" fill="#5d5247"/>
+    <!-- output stream: timed ticks -->
+    <g stroke="#f2b24a" stroke-width="3" stroke-linecap="round">
+      <path d="M672 290 V236"/><path d="M700 290 V258"/><path d="M728 290 V244"/><path d="M756 290 V270"/>
+      <path d="M784 290 V232"/><path d="M812 290 V262"/><path d="M840 290 V250"/><path d="M868 290 V274"/>
+    </g>
+    <path d="M664 292 H 878" stroke="#5d5247" stroke-width="2"/>
+    <text x="664" y="322">Output Stream (µs, µV)</text>
+    <path d="M896 262 H 970" stroke="#5d5247" stroke-width="2"/><path d="M970 262 l-9 -6 v12 z" fill="#5d5247"/>
+    <!-- jacks: gate and stepped CV -->
+    <path d="M990 250 H1012 V226 H1046 V250 H1078 V226 H1100 V250 H1208" fill="none" stroke="#f2b24a" stroke-width="2.5" stroke-linejoin="round"/>
+    <path d="M990 292 H1024 V276 H1066 V284 H1108 V266 H1156 V280 H1208" fill="none" stroke="#e2562b" stroke-width="2.5" stroke-linejoin="round"/>
+    <text x="990" y="322">gates and CV at the jacks</text>
+  </g>
+</svg>

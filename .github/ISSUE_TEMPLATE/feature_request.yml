@@ -1,0 +1,24 @@
+name: Feature or change
+description: Propose a capability or a change to a contract
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you propose
+    validations:
+      required: true
+  - type: checkboxes
+    id: impact
+    attributes:
+      label: Does it touch any of these
+      options:
+        - label: A public name or schema (needs an ADR)
+        - label: The hardware lane
+        - label: The golden vectors

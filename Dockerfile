@@ -16,7 +16,7 @@ RUN apt-get update \
         libsndfile1 \
     && rm -rf /var/lib/apt/lists/*
 
-COPY README.md setup.py ./
+COPY README.md setup.py pyproject.toml ./
 COPY beatoven ./beatoven
 COPY scripts ./scripts
 

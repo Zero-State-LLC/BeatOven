@@ -7,7 +7,7 @@ and enforced by SEED Protocol for deterministic, reproducible output.
 Part of the Applied Alchemy Labs (AAL) ecosystem.
 """
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 __author__ = "Applied Alchemy Labs"
 __license__ = "Apache-2.0"
 
