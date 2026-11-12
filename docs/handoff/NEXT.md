@@ -21,7 +21,7 @@ Updated 2026-11-11, branch `feat/output-module-contract`.
 
 1. 001-T045: write the Pack v1, ResonanceFrame and MIDIEventStream.v1 proposals as ADRs.
 2. 001-T056: real MIDI port transport, behind the grant. Needs a device or a loopback port.
-3. 001-T091 and 001-T092: add a CI test job; fix the tests that fail on `main` (`beatoven/tests/test_api.py`, `test_doctrine.py`; `media_intel` needs `cv2`).
+3. 001-T092: fix the tests that fail on `main` (`beatoven/tests/test_api.py`, `test_doctrine.py`; `media_intel` needs `cv2`).
 4. 001-T093: TRS one-way mode and play-on-arrival mode.
 
 ## Not verified

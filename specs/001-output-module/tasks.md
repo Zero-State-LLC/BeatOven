@@ -54,7 +54,7 @@
 ## Polish
 
 - [ ] 001-T090 Converge the code against the spec after the operator's rulings (workflows: anti-slop-code)
-- [ ] 001-T091 Add a test workflow to CI; the repo has only a deploy workflow (workflows: production-systems)
+- [x] 001-T091 Add a CI job for the Output Module tests, the traceability check and the replay check (workflows: production-systems)
 - [ ] 001-T092 Fix or quarantine the failing tests that predate this branch (`test_api.py`, `test_doctrine.py`, `media_intel` without `cv2`) (workflows: anti-slop-code)
 - [ ] 001-T093 Implement TRS one-way mode and plain play-on-arrival mode, labelled non-deterministic (workflows: anti-slop-code, production-systems)
 - [x] 001-T094 README: mark the "<1ms" latency claim as unmeasured and point to this spec (workflows: google-developer-style)

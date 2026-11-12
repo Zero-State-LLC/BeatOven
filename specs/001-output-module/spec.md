@@ -222,7 +222,7 @@ stateDiagram-v2
 - Governing workflows (skills): `anti-slop-code`, `production-systems`, `google-developer-style`.
 - Owners: **FORGE** decomposes the work into tasks. A **cloud agent** implements. **SCRIBE** files the compact artifact and keeps the docs in `google-developer-style`. **ADVERSARY** reviews each change against the transitions table and the fail-closed criteria before merge.
 - Stack terms live here and in `plan.md` only: the host side is Python in this repo under `beatoven/output_module/`; tests run with pytest; the host link is MIDI System Exclusive; firmware is C in the hardware repo.
-- CI: this repo has only a deploy workflow. A test workflow is task 001-T091.
+- CI: `.github/workflows/test-output-module.yml` runs the acceptance tests, the traceability check and the replay check. The rest of the suite is not in CI (task 001-T092).
 
 ## Traceability
 
