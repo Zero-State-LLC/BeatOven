@@ -198,7 +198,8 @@ Carried forward unchanged from `spec.md`.
 - The real MIDI port transport has run only against the simulated device behind virtual ports, never against hardware.
 - Measured on one machine (macOS 26.3.1, Apple M4, Python 3.14, CoreMIDI virtual ports, 1000 sync exchanges, 2026-11-12) [OBSERVED]: round trip p50 916 µs, p99 7375 µs, max 47772 µs. This includes the driver's 500 µs polling and Python thread scheduling, and no USB. The maximum is close to the 50 ms default look-ahead, so a Python host should use a look-ahead of at least 100 ms [INFERRED]. The integration test uses 150 ms.
 - `SLEW_TO_SAFE` is recorded in the Jack Trace as one entry, not as a ramp of samples.
-- The simulated device answers `PING` only; other Ops kinds return not-ok.
+- The simulated device answers `PING` and the calibration kinds (`CAL_READ`, `CAL_WRITE`, `CAL_REVERT`); other Ops kinds return not-ok. Its calibration record lives in memory, so the stored-record check is modelled by a test hook, not by a real CRC.
+- CLOCK IN edges reach the simulated device only through `clock_in_edge` in tests. No command-line tool shows the reported tempo yet; it is on `OutputModuleDriver.clock_in`.
 - One-way mode (`play_one_way`, `STREAM_BEGIN_REL`) is implemented and tested on a simulated 31.25 kbaud line. Defaults: 1 s lead, 750 ms look-ahead, 4 events per frame. The host does not pre-check that the link can carry the stream; a stream that is too dense fails closed on the device.
 - After a one-way stream ends, the device times out to `SAFE_IDLE` within the sync timeout unless the host keeps sending sync messages. The next run re-syncs it.
 - The plain play-on-arrival MIDI mode (journey 5 in the concept) is not implemented. ADR 0007 proposes it; only its MIDI-to-event mapping exists (`arrival.py`), used by no device.

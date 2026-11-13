@@ -95,7 +95,7 @@ print(report.ok, device.trace_hash())
 | [specs/001-output-module/plan.md](specs/001-output-module/plan.md) | The Output Stream contract, wire format, migration from the older contracts |
 | [specs/001-output-module/audit.md](specs/001-output-module/audit.md) | What was wrong before, with evidence |
 | [docs/decisions/](docs/decisions/2026-11-12-operator-decisions.md) | The operator's decisions of 2026-11-12, and [what was applied](docs/decisions/applied.md) |
-| [docs/adr/](docs/adr/) | Decisions and proposals. 0005 (CLOCK IN) and 0006 (calibration) await a ruling |
+| [docs/adr/](docs/adr/) | Decisions and proposals. 0005 (CLOCK IN) and 0006 (calibration) are accepted; 0007 (play-on-arrival) is proposed and deferred |
 | [GLOSSARY.md](GLOSSARY.md) | The words this project uses |
 | [docs/handoff/NEXT.md](docs/handoff/NEXT.md) | Current state and what is next |
 | [CHANGELOG.md](CHANGELOG.md) | What changed in each version |

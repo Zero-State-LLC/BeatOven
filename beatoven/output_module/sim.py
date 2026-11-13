@@ -21,7 +21,7 @@ from .contract import (
     OutputStream, SafePolicy, reference_descriptor,
 )
 from .lifecycle import Event, Lifecycle, LossReason, State
-from .wire import Frame, Msg, WireError, parse_events_body, split_frames
+from .wire import CLOCK_IN_BODY, Frame, Msg, WireError, parse_events_body, split_frames
 
 TraceEntry = Tuple[int, str, str, int]  # (device t_us, jack, kind, value)
 _REASONS = list(LossReason)
@@ -29,6 +29,25 @@ _STATES = list(State)
 
 # Heap priorities at equal time: internal falling edges, then stream events, then clock ticks.
 _P_OFF, _P_EVENT, _P_CLOCK = 0, 1, 2
+
+# Calibration (ADR 0006). Bounds are a proposal until a board is measured.
+CAL_GAIN_PPM_MAX = 20_000
+CAL_OFFSET_LSB16_MAX = 1_600
+_CAL_KINDS = ("CAL_READ", "CAL_WRITE", "CAL_REVERT")
+_CV_KINDS = (ChannelKind.PITCH_CV, ChannelKind.MOD_CV)
+
+# CLOCK IN reports (ADR 0005).
+CLOCK_IN_REPORT_US = 100_000
+CLOCK_IN_STOP_US = 2_000_000
+_CLOCK_IN_STATES = (State.SYNCED, State.STREAMING)
+
+CalRecord = Dict[int, Tuple[int, int]]  # channel wire id -> (gain_ppm, offset_lsb16)
+
+
+def calibrated_code(code: int, gain_ppm: int, offset_lsb16: int, bits: int = 16) -> int:
+    """The DAC code after calibration. Same integer arithmetic as the firmware core."""
+    num = code * 16_000_000 + code * gain_ppm * 16 + offset_lsb16 * 1_000_000
+    return max(0, min((1 << bits) - 1, (num + 8_000_000) // 16_000_000))
 
 
 class SimulatedOutputModule:
@@ -58,6 +77,17 @@ class SimulatedOutputModule:
         self._cv: Dict[str, int] = {}
         self._levels: Dict[str, int] = {}
         self._tx_seq = 0
+        # Calibration never changes the Jack Trace: only the code sent to the DAC moves.
+        self.dac_codes: Dict[str, int] = {}
+        self._cal: CalRecord = {}
+        self._cal_prev: Optional[CalRecord] = None
+        self._cal_stored = False
+        self._ci_edges = 0
+        self._ci_last: Optional[int] = None
+        self._ci_period = 0
+        self._ci_reported: Optional[int] = None
+        self._ci_running = False
+        self._ci_stop_pending = False
 
     # ---- transport side -------------------------------------------------
     def feed(self, data: bytes, host_now_us: int) -> None:
@@ -100,6 +130,86 @@ class SimulatedOutputModule:
             self._safe_at = None
             self.lifecycle.fire(Event.SAFE_REACHED)
             self._send_status()
+        if self._ci_running and self._now - self._ci_last >= CLOCK_IN_STOP_US:
+            self._ci_running = False
+            self._ci_period = 0
+            self._ci_stop_pending = True
+        if self._ci_stop_pending and self.lifecycle.state in _CLOCK_IN_STATES:
+            self._ci_stop_pending = False      # held until the device may report again
+            self._send_clock_in()
+
+    # ---- CLOCK IN jack (ADR 0005): measured and reported, never acted on ----
+    def clock_in_edge(self, host_now_us: int) -> None:
+        """A rising edge arrives at the CLOCK IN jack. Playout is unaffected."""
+        self.advance(host_now_us)
+        if self._ci_last is not None and self._ci_running:
+            self._ci_period = self._now - self._ci_last
+        self._ci_last = self._now
+        self._ci_edges += 1
+        self._ci_running = True
+        self._ci_stop_pending = False
+        due = self._ci_reported is None or self._now - self._ci_reported >= CLOCK_IN_REPORT_US
+        if self._ci_period and due and self.lifecycle.state in _CLOCK_IN_STATES:
+            self._send_clock_in()
+
+    def _send_clock_in(self) -> None:
+        self._ci_reported = self._now
+        self._send(Msg.CLOCK_IN, CLOCK_IN_BODY.pack(self._ci_last, self._ci_period, self._ci_edges & 0xFFFFFFFF))
+
+    # ---- calibration (ADR 0006) ---------------------------------------------
+    @property
+    def calibration_state(self) -> str:
+        return "stored" if self._cal_stored else "identity"
+
+    def fail_calibration_storage(self) -> None:
+        """Model both stored records failing their check: the device falls back to identity."""
+        self._cal, self._cal_prev, self._cal_stored = {}, None, False
+
+    def _cal_entries(self) -> List[dict]:
+        return [
+            {"channel": s.channel.wire_id, "gain_ppm": g, "offset_lsb16": o}
+            for s in self.descriptor.channels if s.channel.kind in _CV_KINDS
+            for g, o in [self._cal.get(s.channel.wire_id, (0, 0))]
+        ]
+
+    def _cal_parse(self, payload) -> Optional[CalRecord]:
+        """Validate a CAL_WRITE payload against the Descriptor. All or nothing."""
+        entries = payload.get("entries") if isinstance(payload, dict) else None
+        if not isinstance(entries, list) or not entries:
+            return None
+        record: CalRecord = {}
+        for e in entries:
+            if not isinstance(e, dict):
+                return None
+            ch, gain, offset = e.get("channel"), e.get("gain_ppm"), e.get("offset_lsb16")
+            if any(type(v) is not int for v in (ch, gain, offset)) or ch in record:
+                return None
+            try:
+                spec = self.descriptor.spec(Channel.from_wire(ch))
+            except ContractError:
+                return None
+            if spec is None or spec.channel.kind not in _CV_KINDS:
+                return None
+            if abs(gain) > CAL_GAIN_PPM_MAX or abs(offset) > CAL_OFFSET_LSB16_MAX:
+                return None
+            record[ch] = (gain, offset)
+        return record
+
+    def _calibrate(self, kind: str, payload) -> Tuple[bool, Optional[dict]]:
+        if self.lifecycle.state is not State.SYNCED:
+            return False, None
+        if kind == "CAL_READ":
+            return True, {"state": self.calibration_state, "entries": self._cal_entries()}
+        if kind == "CAL_WRITE":
+            record = self._cal_parse(payload)
+            if record is None:
+                return False, None
+            self._cal_prev, self._cal, self._cal_stored = (self._cal if self._cal_stored else None), record, True
+            return True, None
+        if self._cal_prev is None:            # CAL_REVERT with nothing to return to
+            return False, None
+        self._cal, self._cal_prev = self._cal_prev, self._cal
+        return True, None
 
     # ---- protocol ---------------------------------------------------------
     def _send(self, mtype: Msg, body: bytes) -> None:
@@ -119,14 +229,19 @@ class SimulatedOutputModule:
             if st is State.DISCONNECTED:
                 self._outputs_safe(slew=False)
                 self.lifecycle.fire(Event.ATTACH)
-            self._send(Msg.DESCRIPTOR, cbor2.dumps(self.descriptor.to_dict()))
+            desc = self.descriptor.to_dict()
+            if "calibration" in desc:
+                desc["calibration"] = self.calibration_state
+            self._send(Msg.DESCRIPTOR, cbor2.dumps(desc))
         elif f.type is Msg.SYNC:
             self._send(Msg.SYNC_ACK, f.body[:8] + struct.pack(">Q", self._now))
             self._last_sync = self._now
             if st is State.ENUMERATING:
+                self._ci_edges = 0
                 self.lifecycle.fire(Event.SYNC_OK)
             elif st is State.SAFE_IDLE:
                 self.loss_reason = None
+                self._ci_edges = 0
                 self.lifecycle.fire(Event.RESYNC)
         elif f.type in (Msg.STREAM_BEGIN, Msg.STREAM_BEGIN_REL):
             if len(f.body) != 48:
@@ -183,7 +298,12 @@ class SimulatedOutputModule:
                 self._send(Msg.OPS_ACK, cbor2.dumps({"ack": None, "ok": False}))
                 return
             self.ops_log.append(msg)
-            self._send(Msg.OPS_ACK, cbor2.dumps({"ack": msg.get("nonce"), "ok": msg.get("kind") == "PING"}))
+            ack = {"ack": msg.get("nonce"), "ok": msg.get("kind") == "PING"}
+            if msg.get("kind") in _CAL_KINDS and self.descriptor.calibration is not None:
+                ack["ok"], reply = self._calibrate(msg["kind"], msg.get("payload"))
+                if reply is not None:
+                    ack["payload"] = reply
+            self._send(Msg.OPS_ACK, cbor2.dumps(ack))
 
     def _playable(self, events) -> bool:
         """The device checks every event itself; it does not trust the host's check."""
@@ -217,6 +337,7 @@ class SimulatedOutputModule:
             spec = self.descriptor.spec(e.channel)
             code, uv = spec.quantize(e.value)
             self._cv[jack] = uv
+            self.dac_codes[jack] = calibrated_code(code, *self._cal.get(e.channel.wire_id, (0, 0)), bits=spec.bits)
             self.trace.append((t, jack, "CV_UV", uv))
         elif e.op is Op.GATE_ON:
             self._pulse_gen[jack] = self._pulse_gen.get(jack, 0) + 1

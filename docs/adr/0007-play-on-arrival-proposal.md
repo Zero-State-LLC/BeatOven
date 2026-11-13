@@ -1,6 +1,6 @@
 # 7. Play-on-arrival MIDI mode (proposal)
 
-Status: PROPOSED. Nothing in `beatoven.output_stream.v1`, the Descriptor or the wire protocol is changed by this document. The mapping below exists as a pure function in `beatoven/output_module/arrival.py`; no device, simulated or real, uses it yet.
+Status: PROPOSED, and deferred by the operator on 2026-11-13: play-on-arrival is not part of the first hardware revision. It will be decided after a board has played an Output Stream on the bench. Nothing in `beatoven.output_stream.v1`, the Descriptor or the wire protocol is changed by this document. The mapping below exists as a pure function in `beatoven/output_module/arrival.py`; no device, simulated or real, uses it yet.
 
 ## Context
 
@@ -11,6 +11,12 @@ Three things have to be settled before a device may do this.
 1. **Authority.** Spec FR-017 closes the Hardware Lane unless a Hardware Lane Grant names the scope. The grant is checked by the BeatOven host driver. A DAW is not that driver: a device that plays whatever notes arrive moves real voltages with no grant in the path. AGENTS.md forbids adding a way around the grant, so this mode cannot simply be on.
 2. **Determinism.** Events are played when they arrive, so USB polling jitter (0.61 to 1.41 ms measured spread, OBSERVED, `research/transport-facts.md` §1.2) reaches the jacks, and two runs differ. There is no stream id, no played hash and no replay check.
 3. **Fail closed.** A DAW sends no keepalive. If the host stops, a held note stays held.
+
+## Settled on 2026-11-13
+
+- The Hardware Lane is about voltage at the jacks, whoever asks for it. A DAW driving the device is therefore inside its concern, not outside it.
+- The grant is enforced by the BeatOven host only; the device does not verify one (ADR 0006, Authority). How a grant could cover a device acting on its own is not designed.
+- The held-note timeout and a configurable mapping are parked with the mode. They are not decided.
 
 ## Proposal
 

@@ -486,3 +486,174 @@ def test_resonance_frame_from_source_is_deterministic():
     with pytest.raises(TypeError):
         ResonanceFrame.from_source("text")
     assert ResonanceFrame.new("text").id != ResonanceFrame.new("text").id
+
+
+# ---- calibration and CLOCK IN (FR-028..FR-030; ADRs 0005, 0006) -------------------
+
+PITCH0, MOD0, GATE0 = 0x00, 0x10, 0x20
+
+
+def test_at030_calibration_write_read_and_revert_never_change_the_jack_trace():
+    from beatoven.output_module.sim import calibrated_code
+
+    clock, device, _, driver = rig()
+    driver.connect()
+    assert driver.descriptor.calibration == "identity"
+    assert driver.cal_read()["state"] == "identity"
+    assert driver.cal_revert() is False                       # nothing to return to
+
+    first = [{"channel": PITCH0, "gain_ppm": 1_000, "offset_lsb16": -32}]
+    second = [{"channel": PITCH0, "gain_ppm": -500, "offset_lsb16": 16}, {"channel": MOD0, "gain_ppm": 7, "offset_lsb16": 0}]
+    assert driver.cal_write(first) and driver.cal_write(second)
+    read = driver.cal_read()
+    assert read["state"] == "stored" and len(read["entries"]) == 8
+    assert read["entries"][0] == second[0] and read["entries"][2] == second[1]
+    assert driver.cal_revert() and driver.cal_read()["entries"][0] == first[0]
+
+    s = stream()
+    report = driver.play(s)
+    assert report.ok and report.played_hash_ok
+    _, plain, _, plain_driver = rig()
+    plain_driver.connect()
+    plain_driver.play(s)
+    assert device.trace_hash() == plain.trace_hash()           # calibration moves DAC codes only
+    assert device.dac_codes["PITCH_CV:0"] != plain.dac_codes["PITCH_CV:0"]
+    assert device.dac_codes["PITCH_CV:1"] == plain.dac_codes["PITCH_CV:1"]
+    # Same integer arithmetic as the firmware core (kc_calib_apply).
+    assert calibrated_code(32768, 1_000, -32) == 32799 and calibrated_code(65535, 20_000, 1_600) == 65535
+    assert calibrated_code(0, 0, -16) == 0 and calibrated_code(1000, 0, 8) == 1001
+
+    device.fail_calibration_storage()                           # both stored records fail their check
+    assert driver.cal_read() == {"state": "identity", "entries": [
+        {"channel": ch, "gain_ppm": 0, "offset_lsb16": 0} for ch in (0, 1, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15)]}
+
+
+@pytest.mark.parametrize("entries", [
+    [],
+    [{"channel": PITCH0, "gain_ppm": 20_001, "offset_lsb16": 0}],
+    [{"channel": PITCH0, "gain_ppm": 0, "offset_lsb16": -1_601}],
+    [{"channel": GATE0, "gain_ppm": 0, "offset_lsb16": 0}],          # gates have no calibration
+    [{"channel": 0x02, "gain_ppm": 0, "offset_lsb16": 0}],           # no such channel on this device
+    [{"channel": 0x7F, "gain_ppm": 0, "offset_lsb16": 0}],
+    [{"channel": PITCH0, "gain_ppm": 1.5, "offset_lsb16": 0}],
+    [{"channel": PITCH0, "gain_ppm": True, "offset_lsb16": 0}],
+    [{"channel": PITCH0, "gain_ppm": 1, "offset_lsb16": 0}, {"channel": PITCH0, "gain_ppm": 2, "offset_lsb16": 0}],
+    [{"channel": MOD0, "gain_ppm": 5, "offset_lsb16": 5}, {"channel": PITCH0}],   # one bad entry refuses all
+    "not a list",
+])
+def test_at031_calibration_write_is_all_or_nothing_and_only_while_synced(entries):
+    _, device, _, driver = rig()
+    driver.connect()
+    good = [{"channel": PITCH0, "gain_ppm": 100, "offset_lsb16": 1}]
+    assert driver.cal_write(good)
+    assert driver.cal_write(entries) is False
+    assert driver.cal_read()["entries"][0] == good[0]           # the stored record is untouched
+
+    device.feed(Frame(Msg.ABORT, 0, b"").encode(), 0)
+    device.lifecycle.state = State.STREAMING                    # any state but SYNCED refuses all three
+    assert driver.cal_read() is None and driver.cal_write(good) is False and driver.cal_revert() is False
+
+
+def test_at032_changing_calibration_on_hardware_needs_its_own_expiring_grant():
+    def grant(scope, expires_at=None):
+        return HardwareLaneGrant("operator", "2026-11-13T00:00:00+00:00", tuple(scope), expires_at)
+
+    entries = [{"channel": PITCH0, "gain_ppm": 1, "offset_lsb16": 1}]
+    cases = [
+        (grant(["output_module"]), "does not cover scope 'output_module.calibrate'"),
+        (grant(["output_module", "output_module.calibrate"]), "must state when it expires"),
+        (grant(["output_module", "output_module.calibrate"], "2020-01-01T00:00:00+00:00"), "expired"),
+    ]
+    for g, why in cases[:2]:
+        _, device, transport, driver = rig(grant=g)
+        transport.simulated = False
+        assert driver.connect() is State.SYNCED
+        for call in (lambda: driver.cal_write(entries), driver.cal_revert):
+            with pytest.raises(HardwareLaneDenied, match=why):
+                call()
+        assert [m["kind"] for m in device.ops_log] == []         # nothing was sent
+        assert driver.cal_read()["state"] == "identity"          # reading needs no calibration scope
+    with pytest.raises(HardwareLaneDenied, match=cases[2][1]):
+        cases[2][0].check(scope="output_module.calibrate")
+
+    _, device, transport, driver = rig(grant=grant(["output_module", "output_module.calibrate"], "2999-01-01T00:00:00+00:00"))
+    transport.simulated = False
+    driver.connect()
+    assert driver.cal_write(entries) and driver.cal_read()["state"] == "stored"
+
+    _, _, transport, driver = rig(grant=grant(["output_module.calibrate"], "2999-01-01T00:00:00+00:00"))
+    transport.simulated = False
+    assert driver.connect() is State.SAFE_IDLE                   # the calibrate scope does not open play
+
+
+def test_at033_clock_in_is_reported_and_never_changes_playout():
+    clock, device, _, driver = rig()
+    device.clock_in_edge(clock.now_us())                        # before sync: counted by nobody
+    driver.connect()
+    assert driver.descriptor.clock_in is True and driver.clock_in is None
+
+    t0 = clock.now_us()
+    for i in range(1, 12):                                      # 20 ms apart: 125 BPM at 24 PPQN
+        device.clock_in_edge(t0 + i * 20_000)
+    clock.sleep_until(t0 + 240_000)
+    driver.ops("PING")
+    r = driver.clock_in
+    assert r.period_us == 20_000 and r.edges == 11 and r.bpm() == 125.0 and r.bpm(4) == 750.0
+    assert r.edge_us == t0 + 220_000 + device.clock_offset_us
+    reports = [f for f in device_frames(device) if f == Msg.CLOCK_IN]
+    assert len(reports) == 3                                    # at most one per 100 ms, not one per edge
+
+    s = stream()
+    report = driver.play(s)
+    _, plain, _, plain_driver = rig()
+    plain_driver.connect()
+    plain_driver.play(s)
+    assert report.ok and device.trace_csv() == plain.trace_csv()
+
+    clock.sleep_until(t0 + 220_000 + 2_000_000)                 # 2 s with no edge: one final report
+    driver.ops("PING")
+    assert driver.clock_in.period_us == 0 and driver.clock_in.bpm() is None and driver.clock_in.edges == 11
+    assert device_frames(device).count(Msg.CLOCK_IN) == 4
+
+    # A stop that happens while the device may not report is reported once it is SYNCED again.
+    device.clock_in_edge(clock.now_us())
+    device.clock_in_edge(clock.now_us() + 10_000)
+    clock.sleep_until(clock.now_us() + 3_000_000)               # sync timeout first, then the clock stops
+    driver.transport.recv()
+    clock.sleep_until(clock.now_us() + 100_000)                 # let the slew to Safe Values finish
+    driver.transport.recv()
+    assert device.lifecycle.state is State.SAFE_IDLE and device_frames(device).count(Msg.CLOCK_IN) == 4
+    driver.lifecycle.state = State.SAFE_IDLE
+    assert driver.resync() is State.SYNCED
+    driver.ops("PING")
+    assert driver.clock_in.period_us == 0 and driver.clock_in.edges == 0
+
+
+def device_frames(device):
+    """Types of every frame the device has sent, recorded by wrapping its sender once."""
+    return device._sent_types
+
+
+@pytest.fixture(autouse=True)
+def _record_sent_types(monkeypatch):
+    original = SimulatedOutputModule._send
+
+    def recording(self, mtype, body):
+        self.__dict__.setdefault("_sent_types", []).append(mtype)
+        original(self, mtype, body)
+
+    monkeypatch.setattr(SimulatedOutputModule, "_send", recording)
+
+
+def test_at034_a_host_ignores_device_messages_it_does_not_know():
+    _, device, _, driver = rig()
+    driver.connect()
+    unknown = bytearray(Frame(Msg.STATUS, 1, b"\x00\x00\x00\x00\x00\x00").encode())
+    unknown[5] = 0x4F                                           # a type no host knows yet
+    device._tx.append(bytes(unknown))
+    assert driver.ops("PING") is True
+    d = reference_descriptor().to_dict()
+    old = {k: v for k, v in d.items() if k not in ("clock_in", "calibration")}
+    from beatoven.output_module.contract import Descriptor
+    parsed = Descriptor.from_dict(old)                          # a descriptor written before ADRs 0005 and 0006
+    assert parsed.clock_in is False and parsed.calibration is None and parsed.to_dict() == old

@@ -15,11 +15,11 @@ from typing import List, Optional, Protocol
 
 import cbor2
 
-from .authority import HardwareLaneDenied, HardwareLaneGrant, require_hardware_lane
+from .authority import HardwareLaneDenied, HardwareLaneGrant, require_calibration, require_hardware_lane
 from .contract import CONTRACT_VERSION, ContractError, Descriptor, OutputStream
 from .lifecycle import Event, Lifecycle, LossReason, State
 from .sim import SimulatedOutputModule
-from .wire import Frame, Msg, WireError, events_body, split_frames
+from .wire import CLOCK_IN_BODY, Frame, Msg, WireError, events_body, split_frames
 
 _STATES = list(State)
 _REASONS = list(LossReason)
@@ -106,6 +106,22 @@ class OneWayLoopbackTransport:
         self.device.detach()
 
 
+@dataclass(frozen=True)
+class ClockInReport:
+    """What the device measured at its CLOCK IN jack (ADR 0005). Shown and logged; never fed to a render."""
+
+    edge_us: int     # device time of the last rising edge
+    period_us: int   # between the last two edges; 0 means the clock has stopped
+    edges: int       # since the last sync
+
+    def bpm(self, ppqn: int = 24) -> Optional[float]:
+        """Tempo, if the clock runs at ``ppqn`` pulses per quarter note. The device does not know the rate."""
+        return 60_000_000 / (self.period_us * ppqn) if self.period_us else None
+
+
+_GRANTED_OPS = ("CAL_WRITE", "CAL_REVERT")  # change stored calibration: need the calibrate scope
+
+
 @dataclass
 class PlayReport:
     stream_id: str
@@ -144,6 +160,8 @@ class OutputModuleDriver:
         self._last_sync = 0
         self._nonce = 1
         self.max_sync_rtt_us = 5_000
+        self.clock_in: Optional[ClockInReport] = None
+        self.ops_reply: Optional[dict] = None  # payload of the last Ops acknowledgement, if it had one
 
     # ---- plumbing ---------------------------------------------------------
     def _send(self, mtype: Msg, body: bytes = b"") -> int:
@@ -156,9 +174,14 @@ class OutputModuleDriver:
         self._rx.extend(self.transport.recv())
         for raw in split_frames(self._rx):
             try:
-                self._inbox.append(Frame.decode(raw))
+                frame = Frame.decode(raw)
             except WireError:
-                continue  # a corrupt reply is treated as no reply
+                continue  # a corrupt reply, or a type this host does not know, is treated as no reply
+            if frame.type is Msg.CLOCK_IN:
+                if len(frame.body) == CLOCK_IN_BODY.size:
+                    self.clock_in = ClockInReport(*CLOCK_IN_BODY.unpack(frame.body))
+                continue
+            self._inbox.append(frame)
 
     def _take(self, mtype: Msg) -> Optional[Frame]:
         for i, f in enumerate(self._inbox):
@@ -231,13 +254,32 @@ class OutputModuleDriver:
 
     def ops(self, kind: str, payload: Optional[dict] = None) -> bool:
         """Ops lane message: same CBOR map as SerialOpsLane, in a SysEx envelope."""
+        self.ops_reply = None
+        if kind in _GRANTED_OPS:
+            require_calibration(self.grant, simulated=getattr(self.transport, "simulated", False))
         nonce, self._nonce = self._nonce, self._nonce + 1
         self._send(Msg.OPS, cbor2.dumps({"kind": kind, "nonce": nonce, "payload": payload or {}}))
         reply = self._wait(Msg.OPS_ACK)
         if reply is None:
             return False
         ack = cbor2.loads(reply.body)
-        return ack.get("ack") == nonce and bool(ack.get("ok"))
+        ok = ack.get("ack") == nonce and bool(ack.get("ok"))
+        if ok and isinstance(ack.get("payload"), dict):
+            self.ops_reply = ack["payload"]
+        return ok
+
+    # ---- calibration (ADR 0006) -------------------------------------------
+    def cal_read(self) -> Optional[dict]:
+        """The stored record: ``{"state": "identity" | "stored", "entries": [...]}``, or None if refused."""
+        return self.ops_reply if self.ops("CAL_READ") else None
+
+    def cal_write(self, entries: List[dict]) -> bool:
+        """Store a record. Raises HardwareLaneDenied on real hardware without a calibration grant."""
+        return self.ops("CAL_WRITE", {"entries": entries})
+
+    def cal_revert(self) -> bool:
+        """Swap back to the record that the last write replaced."""
+        return self.ops("CAL_REVERT")
 
     # ---- playback -----------------------------------------------------------
     def play(self, stream: OutputStream) -> PlayReport:
