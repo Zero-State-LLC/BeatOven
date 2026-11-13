@@ -8,6 +8,7 @@ Schema identifiers such as `beatoven.pack.v0` and `beatoven.output_stream.v1` ar
 
 ### Added
 
+- Product name recorded as BeatOven (operator, 2026-11-13); delegated decisions and their evidence in `docs/decisions/2026-11-13-delegated-decisions.md`; unsigned Hardware Lane drafts in `docs/decisions/hardware-lane-drafts.md`.
 - Calibration commands on the Ops Lane (ADR 0006, accepted): `CAL_READ`, `CAL_WRITE`, `CAL_REVERT`, with `OutputModuleDriver.cal_read`, `cal_write` and `cal_revert`. Changing calibration on real hardware needs a grant naming `output_module.calibrate` with an expiry.
 - `CLOCK_IN` device report (ADR 0005, accepted), surfaced as `OutputModuleDriver.clock_in`. Playout is unaffected.
 - Optional Descriptor fields `clock_in` and `calibration` under the existing v1 schema.
