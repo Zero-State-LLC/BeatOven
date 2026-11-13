@@ -13,7 +13,7 @@ Three new Ops kinds, carried in the same CBOR map `{kind, nonce, payload}`. The 
 | Kind | Payload | Effect |
 |---|---|---|
 | `CAL_READ` | `{}` | Returns `{state, entries}`: `state` is `identity` or `stored`, and `entries` lists every CV channel. |
-| `CAL_WRITE` | `{entries: [{channel: wire id, gain_ppm, offset_lsb16}, ...]}` | Stores the record. Channels not named are left uncorrected. The record it replaces is kept. |
+| `CAL_WRITE` | `{entries: [{channel: wire id, gain_ppm, offset_lsb16}, ...]}` | Stores the record. Channels not named are left uncorrected. An empty list is refused. The stored record it replaces is kept; the first write on an uncalibrated device replaces nothing, so there is nothing to revert to. |
 | `CAL_REVERT` | `{}` | Swaps back to the record the last write replaced. Refused if there is none. |
 
 Rules:
@@ -23,7 +23,7 @@ Rules:
 3. `CAL_WRITE` validates every entry and writes all or nothing: the channel exists on this device and is a pitch or mod CV channel, no channel appears twice, and the values are integers within the bounds below.
 4. Bounds: gain within ±20,000 ppm, offset within ±1,600 sixteenths of an LSB (±100 LSB, about ±15 mV on a 10 V, 16-bit channel). INFERRED from 0.1 % resistors and the DAC's stated errors; a value outside them is treated as a mistake or a fault. **These are a proposal until a board has been measured.**
 5. All 8 CV channels may be calibrated. Only the pitch channels are required by the bench procedure.
-6. The device keeps exactly one previous record. If both the current and the previous record fail their check, the device uses identity (no correction) and reports `identity`. It still plays.
+6. The device keeps exactly one previous record. If the current record fails its check and the previous one passes, the device uses the previous one and has nothing to revert to. If both fail, the device uses identity (no correction) and reports `identity`. It still plays. (The single-failure case was added during the firmware port on 2026-11-13; the reference device does not model it.)
 7. The Descriptor gains the optional field `calibration`, `"identity"` or `"stored"`, where the device supports these commands. The field stays under `beatoven.output_module_descriptor.v1`; absent means unsupported. No Descriptor version bump.
 
 ### Authority

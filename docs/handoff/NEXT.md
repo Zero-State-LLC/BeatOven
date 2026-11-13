@@ -12,7 +12,7 @@ Updated 2026-11-13. Operator decisions of 2026-11-12 and 2026-11-13 are applied:
   - `python scripts/check_spec_trace.py` (traceability; stands in for spec-lint, which is not on this machine)
   - `python -m beatoven.output_module replay-check <stream.json>`
 - Hardware is in the Kiln repo. No board exists. Every bench number there is a plan.
-- Kiln state on 2026-11-13, branch `hw/kicad-rev-a` at `6d93753` (nothing is on Kiln `main` yet): the firmware core reproduces the current golden vectors, 1146 checks. The board is fully routed: ERC 0 violations; DRC 0 errors, 0 unconnected, 0 parity issues, 6 `track_dangling` warnings (OBSERVED, re-run on that commit). Each of U1's eight supply pins has its own 100 nF capacitor on the opposite side of the board, 0.15 to 0.34 mm away in plan view, through one via (Kiln issue #7, closed). It is not ready to order: no fabrication outputs exist, about 60 back-side parts moved in the last pass and are unreviewed, and no human has reviewed the board electrically. Nothing has been built. See Kiln `hardware/kicad/STATUS.md`.
+- Kiln state on 2026-11-13, branch `hw/kicad-rev-a` at `e7ffa51` or later (nothing is on Kiln `main` yet): the firmware core reproduces the current golden vectors and implements ADRs 0005 and 0006, 3039 checks. The board is fully routed: ERC 0 violations; DRC 0 errors, 0 unconnected, 0 parity issues, 6 `track_dangling` warnings (OBSERVED, re-run at `6d93753`; the board files have not changed since). Each of U1's eight supply pins has its own 100 nF capacitor on the opposite side of the board, 0.15 to 0.34 mm away in plan view, through one via (Kiln issue #7, closed). It is not ready to order: no fabrication outputs exist, about 60 back-side parts moved in the last pass and are unreviewed, and no human has reviewed the board electrically. Nothing has been built. See Kiln `hardware/kicad/STATUS.md`.
 
 ## Needs the operator
 
@@ -24,7 +24,7 @@ The operator accepted every recommended answer on 2026-11-12. What was applied i
 
 ## Next work, in order
 
-1. Port ADRs 0005 and 0006 to Kiln's firmware core: `CLOCK_IN` (type `0x47`), `CAL_READ`, `CAL_WRITE`, `CAL_REVERT`, the previous-record slot, and the two optional Descriptor fields. Kiln's Descriptor test fixture must be regenerated: the reference Descriptor now carries `clock_in` and `calibration`. The golden vectors did not change.
+1. Finish ADRs 0005 and 0006 in Kiln's RP2350 port. The firmware core has them (Kiln `e7ffa51`: 3039 host checks pass, Descriptor byte-identical to the reference, golden vectors unchanged). The port still lacks the CLOCK IN GPIO interrupt and a flash write hook for calibration, and has never been compiled: this Mac has no ARM toolchain.
 2. ADR 0007 (play-on-arrival) is PROPOSED and deferred until a board has played an Output Stream on the bench.
 3. 001-T096: play-on-arrival mode (issue #23). The mapping is written and tested as a pure function (`beatoven/output_module/arrival.py`, 16 tests); wiring it into the simulated device and Kiln's firmware waits on ADR 0007.
 
