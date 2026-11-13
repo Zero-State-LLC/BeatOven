@@ -12,7 +12,7 @@ Updated 2026-11-12. `main` is at PR #34: operator decisions applied, Pack v1 and
   - `python scripts/check_spec_trace.py` (traceability; stands in for spec-lint, which is not on this machine)
   - `python -m beatoven.output_module replay-check <stream.json>`
 - Hardware is in the Kiln repo. No board exists. Every bench number there is a plan.
-- Kiln state on 2026-11-12, branch `hw/kicad-rev-a` at `4fea801` (nothing is on Kiln `main` yet): the firmware core reproduces the current golden vectors, 1146 checks. The board is fully routed: ERC 0 violations; DRC 0 errors, 0 unconnected, 0 parity issues, 10 `track_dangling` warnings (OBSERVED, re-run after the routing work). It is not ready to order: no fabrication outputs exist, eight of U1's supply pins have their nearest decoupling capacitor 4.3 to 6.3 mm away (Kiln issue #7), and no human has reviewed it electrically. Nothing has been built. See Kiln `hardware/kicad/STATUS.md`.
+- Kiln state on 2026-11-13, branch `hw/kicad-rev-a` at `6d93753` (nothing is on Kiln `main` yet): the firmware core reproduces the current golden vectors, 1146 checks. The board is fully routed: ERC 0 violations; DRC 0 errors, 0 unconnected, 0 parity issues, 6 `track_dangling` warnings (OBSERVED, re-run on that commit). Each of U1's eight supply pins has its own 100 nF capacitor on the opposite side of the board, 0.15 to 0.34 mm away in plan view, through one via (Kiln issue #7, closed). It is not ready to order: no fabrication outputs exist, about 60 back-side parts moved in the last pass and are unreviewed, and no human has reviewed the board electrically. Nothing has been built. See Kiln `hardware/kicad/STATUS.md`.
 
 ## Needs the operator
 
