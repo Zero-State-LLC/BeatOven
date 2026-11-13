@@ -247,12 +247,18 @@ stateDiagram-v2
 
 The operator accepted every recommended answer in `docs/decisions/2026-11-12-operator-decisions.md` on 2026-11-12. What that settled is listed under "Decided". These remain open:
 
-1. `[NEEDS CLARIFICATION: BeatOvenRun.v1 schema]` Named in canon, never defined.
-2. `[NEEDS CLARIFICATION: MIDIEventStream.v1 event item shape]` ADR 0004 is accepted as this repo's reading; canon itself is unchanged.
-3. `[NEEDS CLARIFICATION: product name]` Decided only that it is not "Kiln" and not "Beatoven".
-4. `[NEEDS CLARIFICATION: meaning of swing in RhythmTokens]` Swing is not applied to what reaches hardware.
-5. `[NEEDS CLARIFICATION: play-on-arrival]` ADR 0007 is PROPOSED and deferred until after the first hardware revision.
-6. `[NEEDS CLARIFICATION: calibration bounds]` ±20,000 ppm and ±1,600 sixteenths of an LSB are a proposal until a board is measured (ADR 0006).
+1. `[NEEDS CLARIFICATION: play-on-arrival]` ADR 0007 is PROPOSED and deferred until after the first hardware revision.
+2. `[NEEDS CLARIFICATION: calibration bounds]` ±20,000 ppm and ±1,600 sixteenths of an LSB are a proposal until a board is measured (ADR 0006).
+3. `[NEEDS CLARIFICATION: canon's own definitions of BeatOvenRun.v1 and MIDIEventStream.v1]` This repository has a working reading of each (below); the Notion pages are unchanged and are the operator's to amend.
+
+## Decided 2026-11-13 (product name by the operator; the rest by the agent under delegation)
+
+Full reasoning: `docs/decisions/2026-11-13-delegated-decisions.md`.
+
+- **Product name: BeatOven** (operator). "Output Module (PROPOSED)" remains the term for the device.
+- **`BeatOvenRun.v1`**, in this repository, means one render: a BeatOven Pack and the Output Stream compiled from it, identified by the stream id. No schema of that name is defined here.
+- **`MIDIEventStream.v1`** item shape is the one in ADR 0004.
+- **Swing in RhythmTokens** is a metric, not a timing instruction. It can be routed to a mod CV; the adapter never moves a trigger because of it.
 
 ## Decided (operator, 2026-11-13)
 

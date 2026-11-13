@@ -43,7 +43,7 @@ Events stay at 77. The stream is four times longer because bars are four beats, 
 | A4 | PRs #10 and #11 are closed as duplicates. #12 stays open until it is checked against `main`. |
 | D1 | Apply to Raspberry Pi for a product ID. This needs the product's name and a public link, so it waits for D3. |
 | D2 | Buy a MIDI Association manufacturer ID before anything ships. |
-| D3 | Choose the product name. Decided only that it is not "Kiln". |
+| D3 | Product name: **BeatOven**, decided by the operator on 2026-11-13 (`2026-11-13-delegated-decisions.md`). |
 
 ## Applied in the hardware repository
 

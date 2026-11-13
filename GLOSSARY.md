@@ -7,15 +7,15 @@ The Oracle-to-music compiler. It turns Abraxas Oracle output into music and into
 Existing terms keep their meaning and source. This file adds only the terms in the delta table. PatchHive terms (**Rig**, **Case**, **HP**, **Module**, **Placement**) mean what the PatchHive glossary says.
 
 **BeatOven**:
-The Oracle-to-music compiler.
-_Avoid_: Beatoven, Beatoven.ai (an unrelated company)
+The Oracle-to-music compiler, and the name the product ships under: the compiler together with the Module that plays its output.
+_Avoid_: Beatoven, Beatoven.ai (an unrelated company), Kiln (the hardware repository's name only)
 
 **BeatOven Pack**:
 The output of one render: MIDI, an optional cv block, a session recipe and provenance.
 _Avoid_: bundle, export
 
 **Output Module** (PROPOSED):
-The Eurorack Module that plays an Output Stream from its jacks.
+The Eurorack Module that plays an Output Stream from its jacks. It is the hardware part of BeatOven.
 _Avoid_: interface, converter, the box
 
 **Output Stream**:

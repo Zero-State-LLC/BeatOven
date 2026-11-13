@@ -16,11 +16,12 @@ Updated 2026-11-13. Operator decisions of 2026-11-12 and 2026-11-13 are applied:
 
 ## Needs the operator
 
-The operator accepted every recommended answer on 2026-11-12. What was applied is in `docs/decisions/applied.md`. Still the operator's to do:
+The product name is **BeatOven** (operator, 2026-11-13). The remaining decisions were delegated to the agent that day and are recorded, with evidence, in `docs/decisions/2026-11-13-delegated-decisions.md`. What only the operator can do:
 
-1. Amend Spine 006 and 009 in Notion and issue the first Hardware Lane Grant (row A1). The agent does neither.
-2. Choose the product name (D3), then apply for a Raspberry Pi product ID (D1).
-3. Check PR #12 against `main` (A4).
+1. Amend Spine 006 and 009 in Notion and issue the first Hardware Lane Grant. Wording and unsigned grant drafts are in `docs/decisions/hardware-lane-drafts.md`. The agent does neither.
+2. Get a trademark lawyer's view before any public launch: BEATOVEN is a live US service mark (registration 7363061) held by an unrelated company, covering music composition and AI music software services.
+3. File for a Raspberry Pi USB product ID and buy the MIDI Association's US$240 SysEx ID before anything ships. Both forms need company details.
+4. Close PR #12 or keep it. It is not a duplicate; the finding is on the PR and in the decisions file.
 
 ## Next work, in order
 

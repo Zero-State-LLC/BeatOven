@@ -92,3 +92,12 @@ These need the operator, canon or a design proposal, and are in the brief or the
 - **Reference buffer.** The DAC's reference could drive the 1.0 mA load directly, but would shift by 100 µV, so the buffer stays (CALCULATED).
 - **Crystal drift.** 30 ppm over 60 s is 1.8 ms, not the 3 ms assumed. Temperature and ageing are extra.
 - **Short-circuit test.** The op-amp's continuous rating covers one output shorted to ground. Shorts to the ±12 V rails are outside it, which is the case the test plan must prove.
+
+## 8. Second pass, 2026-11-13
+
+A second pass read primary sources for several items in section 5. Results and the decisions taken from them are in [../2026-11-13-delegated-decisions.md](../2026-11-13-delegated-decisions.md), sections 2 and 4. In short:
+
+- Closed: Apple's accessory power figure (4.5 W, iPhone 15 and later; the rejection in section 4 is withdrawn), RP2350 run current, the MIDI Association's ID terms.
+- Narrowed: the inductor's polarity dot (the datasheet figure implies the output side; not confirmed against Raspberry Pi's board file).
+- Still open: jack height, front-panel USB mounting, bare-board price, and register searches outside the USPTO and UKIPO.
+- New: the product name was decided as BeatOven, and BEATOVEN is a live US service mark held by an unrelated company.
