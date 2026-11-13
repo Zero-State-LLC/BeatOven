@@ -123,6 +123,9 @@ Acceptance criteria:
 | FR-018 | A simulated Output Module MUST produce a Jack Trace for any Output Stream, with no grant. | AT-016 |
 | FR-026 | On a link with no return path the Output Module MUST still schedule every event from a start it derives on receipt, and the host MUST report the run as unconfirmed. A link too slow for the stream MUST end in Timing Loss, not late notes. | AT-025, AT-026 |
 | FR-027 | The host MUST be able to play an Output Stream through the operating system's own MIDI ports, with the same Jack Trace as in simulation. | AT-028 |
+| FR-028 | The host MUST be able to read, write and revert an Output Module's calibration record over the Ops Lane, only while `SYNCED`. A write MUST be validated against the Descriptor and stated bounds and stored all or nothing. Calibration MUST NOT change the Output Stream, the played hash or the Jack Trace. (ADR 0006) | AT-030, AT-031 |
+| FR-029 | Changing calibration on real hardware MUST need a Hardware Lane Grant that names the `output_module.calibrate` scope and states an expiry. That scope MUST NOT open play, and the play scope MUST NOT permit changing calibration. (ADR 0006) | AT-032 |
+| FR-030 | An Output Module with a CLOCK IN jack MUST report the measured period to the host and MUST NOT change playout because of it. A host MUST ignore device messages and Descriptor fields it does not know. (ADR 0005) | AT-033, AT-034 |
 | FR-019 | The Module MUST be 3U (128.5 mm panel) and 12 HP, and ≤ 40 mm deep behind the panel. | HT-1 (inspection) |
 | FR-020 | The Module MUST draw ≤ 120 mA from +12 V and ≤ 50 mA from −12 V, and MUST survive reversed power. | HT-1 |
 | FR-021 | The Module MUST provide ≥ 1 pitch output at 1 V/oct, ±1 cent per octave over 5 octaves after calibration, with static error within ±0.5 mV at every calibration point and a 1 V step within 1 cent (833 µV) inside 200 µs, measured at the jack (operator decision C5); ≥ 4 CV outputs; ≥ 4 gate/trigger outputs; 1 clock and 1 reset output. | HT-2, HT-3 |
@@ -236,6 +239,8 @@ stateDiagram-v2
 | Rehearse without hardware | anti-slop-code | all, on the simulated device | Jack Trace (FR-018), Hardware Lane (FR-017) | AT-016, AT-021 | 001-T022, T032 |
 | Bring existing contracts over | anti-slop-code, google-developer-style | none (pure compile) | Adapters, wire frame, Ops lane (FR-005–011) | AT-006–013 | 001-T040–T045 |
 | Play over the fallback link | production-systems, anti-slop-code | attach, sync_ok, stream_begin, stream_end, timing_loss (device side; host copy unconfirmed) | Relative stream start (FR-026) | AT-025, AT-026 | 001-T093 |
+| Calibrate a Module | production-systems, anti-slop-code | attach, sync_ok (commands are legal only in `SYNCED`) | Calibration record, calibrate scope of the Hardware Lane Grant (FR-028, 029) | AT-030–032 | 001-T099 |
+| Watch an external clock | production-systems | sync_ok, stream_begin, stream_end | `CLOCK_IN` report, optional Descriptor fields (FR-030) | AT-033, AT-034 | 001-T100 |
 | Use the physical Module | production-systems | all, on hardware | Electrical and timing limits (FR-019–025) | HT-1–HT-6 (plan only) | 001-T050–T056 |
 
 ## Open clarifications
@@ -245,9 +250,16 @@ The operator accepted every recommended answer in `docs/decisions/2026-11-12-ope
 1. `[NEEDS CLARIFICATION: BeatOvenRun.v1 schema]` Named in canon, never defined.
 2. `[NEEDS CLARIFICATION: MIDIEventStream.v1 event item shape]` ADR 0004 is accepted as this repo's reading; canon itself is unchanged.
 3. `[NEEDS CLARIFICATION: product name]` Decided only that it is not "Kiln" and not "Beatoven".
-4. `[NEEDS CLARIFICATION: CLOCK IN behaviour]` The contract has no message for external sync.
-5. `[NEEDS CLARIFICATION: calibration commands on the Ops lane]`
-6. `[NEEDS CLARIFICATION: meaning of swing in RhythmTokens]` Swing is not applied to what reaches hardware.
+4. `[NEEDS CLARIFICATION: meaning of swing in RhythmTokens]` Swing is not applied to what reaches hardware.
+5. `[NEEDS CLARIFICATION: play-on-arrival]` ADR 0007 is PROPOSED and deferred until after the first hardware revision.
+6. `[NEEDS CLARIFICATION: calibration bounds]` ±20,000 ppm and ±1,600 sixteenths of an LSB are a proposal until a board is measured (ADR 0006).
+
+## Decided (operator, 2026-11-13)
+
+- CLOCK IN is report-only: the device reports the raw period, the host assumes 24 pulses per quarter note by default, and the measured tempo is shown and logged, never fed to a render (ADR 0005, FR-030).
+- Calibration is `CAL_READ`, `CAL_WRITE` and `CAL_REVERT` on the Ops Lane, under its own expiring grant scope. `CAL_RAW` is dropped (ADR 0006, FR-028, FR-029).
+- The Hardware Lane is about voltage at the jacks, whoever asks for it. It is enforced by the host only; the device does not verify a grant.
+- New Descriptor fields are optional under the existing v1 schema; absent means unsupported.
 
 ## Decided (operator, 2026-11-12)
 

@@ -43,6 +43,7 @@ class Msg(IntEnum):
     STATUS = 0x44
     OPS_ACK = 0x45
     STREAM_DONE = 0x46
+    CLOCK_IN = 0x47          # ADR 0005: last edge (device us), period (us, 0 = stopped), edges since sync
 
 
 class WireError(ContractError):
@@ -137,6 +138,9 @@ def split_frames(buf: bytearray) -> Iterator[bytes]:
         frame = bytes(buf[start:end + 1])
         del buf[:end + 1]
         yield frame
+
+
+CLOCK_IN_BODY = struct.Struct(">QII")
 
 
 def events_body(first_index: int, events: Sequence[OutputEvent]) -> bytes:

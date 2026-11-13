@@ -16,6 +16,7 @@ from typing import Optional
 
 GRANT_SCHEMA = "beatoven.hardware_lane_grant.v1"
 SCOPE = "output_module"
+CALIBRATE_SCOPE = "output_module.calibrate"  # ADR 0006: separate from play, and must expire
 
 
 class HardwareLaneDenied(PermissionError):
@@ -39,9 +40,11 @@ class HardwareLaneGrant:
             raise HardwareLaneDenied("grant file is not a valid hardware lane grant")
         return HardwareLaneGrant(d["granted_by"], d["granted_at"], tuple(d.get("scope", ())), d.get("expires_at"))
 
-    def check(self, now: Optional[datetime] = None) -> None:
-        if SCOPE not in self.scope:
-            raise HardwareLaneDenied(f"grant does not cover scope {SCOPE!r}")
+    def check(self, now: Optional[datetime] = None, scope: str = SCOPE) -> None:
+        if scope not in self.scope:
+            raise HardwareLaneDenied(f"grant does not cover scope {scope!r}")
+        if scope == CALIBRATE_SCOPE and self.expires_at is None:
+            raise HardwareLaneDenied("a calibration grant must state when it expires")
         if self.expires_at is not None:
             now = now or datetime.now(timezone.utc)
             if now >= datetime.fromisoformat(self.expires_at):
@@ -55,3 +58,12 @@ def require_hardware_lane(grant: Optional[HardwareLaneGrant], *, simulated: bool
     if grant is None:
         raise HardwareLaneDenied("hardware_control_allowed is false: no operator grant supplied")
     grant.check()
+
+
+def require_calibration(grant: Optional[HardwareLaneGrant], *, simulated: bool) -> None:
+    """Raise unless calibration may be changed on this transport. Default is deny."""
+    if simulated:
+        return
+    if grant is None:
+        raise HardwareLaneDenied("no operator grant supplied for calibration")
+    grant.check(scope=CALIBRATE_SCOPE)

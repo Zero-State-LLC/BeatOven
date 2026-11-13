@@ -8,6 +8,10 @@ Schema identifiers such as `beatoven.pack.v0` and `beatoven.output_stream.v1` ar
 
 ### Added
 
+- Calibration commands on the Ops Lane (ADR 0006, accepted): `CAL_READ`, `CAL_WRITE`, `CAL_REVERT`, with `OutputModuleDriver.cal_read`, `cal_write` and `cal_revert`. Changing calibration on real hardware needs a grant naming `output_module.calibrate` with an expiry.
+- `CLOCK_IN` device report (ADR 0005, accepted), surfaced as `OutputModuleDriver.clock_in`. Playout is unaffected.
+- Optional Descriptor fields `clock_in` and `calibration` under the existing v1 schema.
+- Glossary: Ops Lane, Play-on-Arrival.
 - ADR 0007 (PROPOSED): play-on-arrival MIDI mode. `beatoven/output_module/arrival.py` holds its MIDI-to-event mapping as a pure function, labelled `NON_DETERMINISTIC`. No device uses it.
 - `beatoven.pack.v1` (ADR 0002): `render_pack(..., schema_version="v1")` states the time unit and clock rate and embeds the Output Stream. v0 is still the default and is unchanged.
 - `ResonanceFrame.from_source`, a deterministic constructor (ADR 0003).

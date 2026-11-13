@@ -46,6 +46,14 @@ _Avoid_: hardware mode
 An operator's written permission that opens the Hardware Lane for a named scope.
 _Avoid_: token, key
 
+**Ops Lane**:
+The path for commands to a device that are not Output Events.
+_Avoid_: control channel, command stream
+
+**Play-on-Arrival** (PROPOSED):
+A device playing plain MIDI as it arrives, with no Output Stream. Not deterministic.
+_Avoid_: live mode, MIDI mode, passthrough
+
 **Timing Loss**:
 The moment a device can no longer play the Output Stream at its stated times.
 _Avoid_: dropout, glitch, underrun
@@ -65,5 +73,7 @@ _Avoid_: default, zero
 | Descriptor | spec FR-004 | The host must not guess what a device can do. |
 | Jack Trace | spec FR-018 | The thing two replays are compared by. |
 | Hardware Lane, Hardware Lane Grant | audit row 1; Spine 006 and 009 `hardware_control_allowed` | Canon forbids hardware control; a bounded exception needs a name. |
+| Ops Lane | dspcoffee bridge `ops` commands; ADR 0006 | The word was in use for the command path without a definition. "Lane" otherwise stays the Pack's word. |
+| Play-on-Arrival | concept journey 5; ADR 0007 | Used in four documents and the code with no entry. |
 | Timing Loss | MIDI Batch 003 `fail_closed_on_timing_loss` | Canon used the phrase without defining it. |
 | Safe Value | spec FR-014 | "Fail closed" needs a stated end state per Output Channel. |

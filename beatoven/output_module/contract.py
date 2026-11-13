@@ -282,6 +282,9 @@ class Descriptor:
     keepalive_timeout_us: int = 300_000
     sync_timeout_us: int = 2_000_000
     safe_slew_us: int = 50_000
+    # Optional (ADRs 0005, 0006). Absent from the dict means the device does not support it.
+    clock_in: bool = False
+    calibration: Optional[str] = None  # "identity" or "stored"
 
     def spec(self, channel: Channel) -> Optional[ChannelSpec]:
         for s in self.channels:
@@ -301,7 +304,7 @@ class Descriptor:
                 )
 
     def to_dict(self) -> Dict[str, Any]:
-        return {
+        d: Dict[str, Any] = {
             "schema": DESCRIPTOR_VERSION, "device": self.device, "firmware": self.firmware,
             "contract_versions": list(self.contract_versions),
             "channels": [c.to_dict() for c in self.channels],
@@ -309,6 +312,11 @@ class Descriptor:
             "min_lead_us": self.min_lead_us, "keepalive_timeout_us": self.keepalive_timeout_us,
             "sync_timeout_us": self.sync_timeout_us, "safe_slew_us": self.safe_slew_us,
         }
+        if self.clock_in:
+            d["clock_in"] = True
+        if self.calibration is not None:
+            d["calibration"] = self.calibration
+        return d
 
     @staticmethod
     def from_dict(d: Dict[str, Any]) -> "Descriptor":
@@ -325,9 +333,22 @@ class Descriptor:
                 keepalive_timeout_us=int(d["keepalive_timeout_us"]),
                 sync_timeout_us=int(d["sync_timeout_us"]),
                 safe_slew_us=int(d["safe_slew_us"]),
+                clock_in=d.get("clock_in", False) is True,
+                calibration=_calibration_state(d.get("calibration")),
             )
         except (KeyError, TypeError, ValueError) as exc:
             raise ContractError(f"malformed descriptor: {exc}") from exc
+
+
+CALIBRATION_STATES = ("identity", "stored")
+
+
+def _calibration_state(value: Any) -> Optional[str]:
+    if value is None:
+        return None
+    if value not in CALIBRATION_STATES:
+        raise ValueError(f"bad calibration state: {value!r}")
+    return value
 
 
 def reference_descriptor(device: str = "sim", firmware: str = "sim-0.1.0") -> Descriptor:
@@ -345,4 +366,4 @@ def reference_descriptor(device: str = "sim", firmware: str = "sim-0.1.0") -> De
         chans.append(ChannelSpec(Channel(ChannelKind.GATE, i)))
     chans.append(ChannelSpec(Channel(ChannelKind.CLOCK, 0)))
     chans.append(ChannelSpec(Channel(ChannelKind.RESET, 0)))
-    return Descriptor(device=device, firmware=firmware, channels=tuple(chans))
+    return Descriptor(device=device, firmware=firmware, channels=tuple(chans), clock_in=True, calibration="identity")
