@@ -12,7 +12,7 @@ Two things pull against each other. A performer expects a clock input to make th
 
 **Report only.** The device measures CLOCK IN and tells the host. Playout is unaffected, so determinism is untouched.
 
-- New device-to-host message `CLOCK_IN` (type `0x47`), body `>QII`: device time of the last rising edge in µs, the period between the last two edges in µs, and a count of edges since the last sync.
+- New device-to-host message `CLOCK_IN` (type `0x47`), body `>QII`: device time of the last rising edge in µs, the period between the last two edges in µs, and a count of edges since the device last entered `SYNCED` from `ENUMERATING` or `SAFE_IDLE`. A repeated sync while already `SYNCED` does not reset the count.
 - The device reports the raw period only. It does not know or assume a pulse rate.
 - Reports are sent only in `SYNCED` and `STREAMING`, at most once per 100 ms while edges arrive, and only once two edges give a period.
 - When 2 s pass with no edge, the device sends one final report with period 0. If the device is in another state at that moment, it sends that report on its next entry to `SYNCED`.
