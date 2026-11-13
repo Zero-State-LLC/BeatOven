@@ -8,7 +8,7 @@ Updated 2026-11-12. `main` is at PR #34: operator decisions applied, Pack v1 and
 
 - Software for the Output Module is implemented and tested in simulation: `beatoven/output_module/`, spec in `specs/001-output-module/`.
 - Run the checks:
-  - `python -m pytest beatoven/output_module` (40 tests; 2 need `python-rtmidi` and a MIDI backend, else they skip)
+  - `python -m pytest beatoven/output_module` (56 tests; 2 need `python-rtmidi` and a MIDI backend, else they skip)
   - `python scripts/check_spec_trace.py` (traceability; stands in for spec-lint, which is not on this machine)
   - `python -m beatoven.output_module replay-check <stream.json>`
 - Hardware is in the Kiln repo. No board exists. Every bench number there is a plan.
@@ -24,9 +24,9 @@ The operator accepted every recommended answer on 2026-11-12. What was applied i
 
 ## Next work, in order
 
-1. Rule on the PROPOSED ADRs 0005 (`CLOCK IN`) and 0006 (calibration commands). Operator.
+1. Rule on the PROPOSED ADRs 0005 (`CLOCK IN`), 0006 (calibration commands) and 0007 (play-on-arrival). Operator. ADR 0007 turns on one question: may a device play a DAW's plain MIDI, which passes no Hardware Lane Grant, once it has been armed under a grant?
 2. Implement whichever of them is accepted, in the reference device first, then in Kiln's firmware.
-3. 001-T096: play-on-arrival mode (issue #23).
+3. 001-T096: play-on-arrival mode (issue #23). The mapping is written and tested as a pure function (`beatoven/output_module/arrival.py`, 16 tests); wiring it into the simulated device and Kiln's firmware waits on ADR 0007.
 
 ## Known issues in the reference device (found while porting to firmware; see Kiln `docs/firmware-architecture.md` §10)
 

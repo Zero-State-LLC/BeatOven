@@ -201,4 +201,4 @@ Carried forward unchanged from `spec.md`.
 - The simulated device answers `PING` only; other Ops kinds return not-ok.
 - One-way mode (`play_one_way`, `STREAM_BEGIN_REL`) is implemented and tested on a simulated 31.25 kbaud line. Defaults: 1 s lead, 750 ms look-ahead, 4 events per frame. The host does not pre-check that the link can carry the stream; a stream that is too dense fails closed on the device.
 - After a one-way stream ends, the device times out to `SAFE_IDLE` within the sync timeout unless the host keeps sending sync messages. The next run re-syncs it.
-- The plain play-on-arrival MIDI mode (journey 5 in the concept) is not implemented.
+- The plain play-on-arrival MIDI mode (journey 5 in the concept) is not implemented. ADR 0007 proposes it; only its MIDI-to-event mapping exists (`arrival.py`), used by no device.
