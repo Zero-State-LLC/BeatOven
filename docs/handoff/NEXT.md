@@ -18,7 +18,7 @@ Updated 2026-11-13. Operator decisions of 2026-11-12 and 2026-11-13 are applied:
 
 The product name is **BeatOven** (operator, 2026-11-13). The remaining decisions were delegated to the agent that day and are recorded, with evidence, in `docs/decisions/2026-11-13-delegated-decisions.md`. What only the operator can do:
 
-1. Amend Spine 006 and 009 in Notion and issue the first Hardware Lane Grant. Wording and unsigned grant drafts are in `docs/decisions/hardware-lane-drafts.md`. The agent does neither.
+1. Hardware Lane: decided. The operator signed a grant on 2026-11-13 (kept outside the repository; the agent has not seen it), and Spine 006 and 009 carry an amendment section of the same date (`FACTS.md`). Pass the grant file's path to the driver when there is hardware to open. Nothing further is needed until a board exists.
 2. Get a trademark lawyer's view before any public launch: BEATOVEN is a live US service mark (registration 7363061) held by an unrelated company, covering music composition and AI music software services.
 3. File for a Raspberry Pi USB product ID and buy the MIDI Association's US$240 SysEx ID before anything ships. Both forms need company details.
 4. Close PR #12 or keep it. It is not a duplicate; the finding is on the PR and in the decisions file.

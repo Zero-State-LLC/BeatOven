@@ -1,6 +1,6 @@
-# Hardware Lane: drafts for the operator to sign
+# Hardware Lane: the amendment and grant templates
 
-Status: DRAFT. Nothing here is in force. The agent does not issue a Hardware Lane Grant and does not edit Notion; both are the operator's acts (`FACTS.md`, 2026-11-12). These drafts exist so that issuing them is a copy and a signature, not a writing task. Tracked in issue #18.
+Status: section 1 is IN FORCE. Its wording was appended to Spine 006 and 009 in Notion on 2026-11-13, by the agent on the operator's instruction, as a section titled "AMENDMENT 2026-11-13 — Hardware Lane Grant". The Spine 009 copy adds that no scope is defined for PatchHive itself. Sections 2 and 3 remain templates: the operator states that a grant is signed, and that file is not in this repository.
 
 ## 1. Proposed amendment to Spine 006 and 009
 
